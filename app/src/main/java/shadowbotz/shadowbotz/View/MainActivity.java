@@ -1,5 +1,7 @@
 package shadowbotz.shadowbotz.View;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -13,10 +15,15 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import shadowbotz.shadowbotz.Config;
+import shadowbotz.shadowbotz.Controller.PersistentController;
 import shadowbotz.shadowbotz.R;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    SharedPreferences sharedPreferences; //TODO: to test sharedpreference
+    PersistentController persistentController = new PersistentController();//TODO: to test sharedpreference
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,11 +32,15 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        sharedPreferences = getSharedPreferences(Config.SHARED_PREF_NAME, Context.MODE_PRIVATE); //TODO: to test sharedpreference
+//        persistentController.f1Andf2Button(MainActivity.this, Config.F1_BUTTON, "testing"); //TODO: to test sharedpreference
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+
+                Snackbar.make(view, sharedPreferences.getString(Config.F1_BUTTON, ""), Snackbar.LENGTH_LONG) //TODO: to test sharedpreference
                         .setAction("Action", null).show();
             }
         });
