@@ -7,19 +7,12 @@
     android:fitsSystemWindows="true"
     android:orientation="horizontal">
 
-    <fragment
-        android:id="@+id/fragmentLeft"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="2"
-        android:name="shadowbotz.shadowbotz.View.LeftFragment"/>
-
 
     <fragment
-        android:id="@+id/fragmentRight"
+        android:id="@+id/fragmentRobot"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:name="shadowbotz.shadowbotz.View.RightFragment"/>
+        android:name="shadowbotz.shadowbotz.View.RobotFragment"/>
 
 </LinearLayout>
