@@ -5,7 +5,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
+import shadowbotz.shadowbotz.Controller.PersistentController;
 import shadowbotz.shadowbotz.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -34,7 +36,14 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_bluetooth) {
+            Toast.makeText(this, "Bluetooth", Toast.LENGTH_SHORT).show();
+            //TODO: include function to call intent to bluetooth
+            return true;
+        }
+        if (id == R.id.action_settings){
+            PersistentController persistentController = new PersistentController();
+            persistentController.f1AndF2Dialog(MainActivity.this);
             return true;
         }
 
