@@ -6,7 +6,6 @@
     android:fitsSystemWindows="true"
     android:orientation="horizontal">
 
-
     <fragment
         android:id="@+id/fragmentRobot"
         android:layout_width="0dp"
