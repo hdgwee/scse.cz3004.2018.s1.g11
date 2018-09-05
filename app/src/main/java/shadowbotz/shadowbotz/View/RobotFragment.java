@@ -23,6 +23,7 @@ import com.andretietz.android.controller.InputView;
 
 import shadowbotz.shadowbotz.Config;
 import shadowbotz.shadowbotz.Controller.ImageAdapter;
+import shadowbotz.shadowbotz.Controller.MovementController;
 import shadowbotz.shadowbotz.R;
 
 public class RobotFragment extends Fragment {
@@ -53,6 +54,8 @@ public class RobotFragment extends Fragment {
 
         final ImageAdapter imageAdapter = new ImageAdapter(fragmentBelongActivity);
 
+        final MovementController movementController = new MovementController(imageAdapter);
+
         //for onCreateOptionsMenu
         setHasOptionsMenu(true);
 
@@ -68,31 +71,18 @@ public class RobotFragment extends Fragment {
                 if((position%15>=1 && position%15<=13) && (Math.abs(position/15) >=1 && Math.abs(position/15) <=18)){
                     if(count == 2){
                         body = position;
-                        imageAdapter.mThumbIds[body] = 8;
-                        //4 corners
-                        imageAdapter.mThumbIds[body-14] = 8; //set the whole body
-                        imageAdapter.mThumbIds[body-16] = 8;
-                        imageAdapter.mThumbIds[body+14] = 8;
-                        imageAdapter.mThumbIds[body+16] = 8;
-
-                        //the rest
-                        imageAdapter.mThumbIds[body+1] = 8;
-                        imageAdapter.mThumbIds[body-1] = 8;
-                        imageAdapter.mThumbIds[body+15] = 8;
-                        imageAdapter.mThumbIds[body-15] = 8;
+                        movementController.setBody(body); //set the starting position of the robot
                         count --;
                     }
                     else if(count == 1){
                         head=position;
-                        if(head == body+1 || head == body-1 ||head == body+15 ||head == body-15 ){
-                            imageAdapter.mThumbIds[head] = 9;
+                        if(head == body+1 || head == body-1 ||head == body+15 ||head == body-15 ){  //make sure head is at the correct position
+                            movementController.setHead(head);
                             count --;
                         }
                         else{
-
                             Toast.makeText(fragmentBelongActivity, "Invalid head position", Toast.LENGTH_SHORT).show();
                         }
-                        
                     }
                     else{
                         Toast.makeText(fragmentBelongActivity, "Robot Position Set!", Toast.LENGTH_SHORT).show();
@@ -102,14 +92,12 @@ public class RobotFragment extends Fragment {
                 else{
                     Toast.makeText(fragmentBelongActivity, "Out of Range!", Toast.LENGTH_SHORT).show();
                 }
-                
             }
         });
         gridview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() { //set way point
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Toast.makeText(fragmentBelongActivity,  Math.abs(i/15)+", "+i%15,
-                        Toast.LENGTH_SHORT).show();
+                Toast.makeText(fragmentBelongActivity,  Math.abs(i/15)+", "+i%15, Toast.LENGTH_SHORT).show();
                 leftEditText.setText("Way point: " +Math.abs(i/15)+", "+i%15); //to edit the left fragment
                 return false;
             }
@@ -119,160 +107,87 @@ public class RobotFragment extends Fragment {
 
         directionView.setOnButtonListener(new InputView.InputEventListener() {
             @Override public void onInputEvent(View view, int buttons) {
-                //TODO: implment manual movement
-                switch (buttons&0xff) {
-                    case DirectionView.DIRECTION_DOWN:
-                        Toast.makeText(fragmentBelongActivity, "Not in use!", Toast.LENGTH_SHORT).show();
-                        break;
-                    case DirectionView.DIRECTION_RIGHT:
 
-                        if(head == body+1){ //face right
-                            imageAdapter.mThumbIds[head] = 8;
-                            head = body+15;
-                            imageAdapter.mThumbIds[head] = 9;
-
-                        }
-                        else if(head == body-1) { //face left
-                            imageAdapter.mThumbIds[head] = 8;
-                            head = body-15;
-                            imageAdapter.mThumbIds[head] = 9;
-
-                        }
-                        else if(head == body-15) { //face up
-                            imageAdapter.mThumbIds[head] = 8;
-                            head = body+1;
-                            imageAdapter.mThumbIds[head] = 9;
-
-                        }
-                        else{ //face down
-                            imageAdapter.mThumbIds[head] = 8;
-                            head = body-1;
-                            imageAdapter.mThumbIds[head] = 9;
-                        }
-                        break;
-                    case DirectionView.DIRECTION_LEFT:
-                        if(head == body+1){ //face right
-                            imageAdapter.mThumbIds[head] = 8;
-                            head = body-15;
-                            imageAdapter.mThumbIds[head] = 9;
-
-                        }
-                        else if(head == body-1) { //face left
-                            imageAdapter.mThumbIds[head] = 8;
-                            head = body+15;
-                            imageAdapter.mThumbIds[head] = 9;
-
-                        }
-                        else if(head == body-15) { //face up
-                            imageAdapter.mThumbIds[head] = 8;
-                            head = body-1;
-                            imageAdapter.mThumbIds[head] = 9;
-
-                        }
-                        else{ //face down
-                            imageAdapter.mThumbIds[head] = 8;
-                            head = body+1;
-                            imageAdapter.mThumbIds[head] = 9;
-                        }
-                        break;
-                    case DirectionView.DIRECTION_UP: //move forward
-                        if((head%15>=1 && head%15<=13) && (Math.abs(head/15) >=1 && Math.abs(head/15) <=18)){
+                if(count == 0){
+                    switch (buttons&0xff) {
+                        case DirectionView.DIRECTION_DOWN:
+                            Toast.makeText(fragmentBelongActivity, "Not in use!", Toast.LENGTH_SHORT).show();
+                            break;
+                        case DirectionView.DIRECTION_RIGHT:
 
                             if(head == body+1){ //face right
-                                imageAdapter.mThumbIds[head+1] = 9;
+                                head = movementController.turnRightwhenFaceRight(head, body);
 
-                                //4 corners
-                                imageAdapter.mThumbIds[(body-14)+1] = 8; //set the whole body
-                                imageAdapter.mThumbIds[(body-16)+1] = 8;
-                                imageAdapter.mThumbIds[(body+14)+1] = 8;
-                                imageAdapter.mThumbIds[(body+16)+1] = 8;
-
-                                //the rest
-                                imageAdapter.mThumbIds[(body)+1] = 8;
-                                imageAdapter.mThumbIds[(body-1)+1] = 8;
-                                imageAdapter.mThumbIds[(body+15)+1] = 8;
-                                imageAdapter.mThumbIds[(body-15)+1] = 8;
-
-                                //convert back of robot to explored
-                                imageAdapter.mThumbIds[(body-1)] = 1;
-                                imageAdapter.mThumbIds[(body-16)] = 1;
-                                imageAdapter.mThumbIds[(body+14)] = 1;
-                                head ++;
-                                body++;
                             }
-                            else if(head == body-1){ //face left
-                                imageAdapter.mThumbIds[head-1] = 9;
+                            else if(head == body-1) { //face left
 
-                                //4 corners
-                                imageAdapter.mThumbIds[(body-14)-1] = 8; //set the whole body
-                                imageAdapter.mThumbIds[(body-16)-1] = 8;
-                                imageAdapter.mThumbIds[(body+14)-1] = 8;
-                                imageAdapter.mThumbIds[(body+16)-1] = 8;
+                                head = movementController.turnRightwhenFaceLeft(head, body);
 
-                                //the rest
-                                imageAdapter.mThumbIds[(body)-1] = 8;
-                                imageAdapter.mThumbIds[(body+1)-1] = 8;
-                                imageAdapter.mThumbIds[(body+15)-1] = 8;
-                                imageAdapter.mThumbIds[(body-15)-1] = 8;
-
-                                //convert back of robot to explored
-                                imageAdapter.mThumbIds[(body+1)] = 1;
-                                imageAdapter.mThumbIds[(body+16)] = 1;
-                                imageAdapter.mThumbIds[(body-14)] = 1;
-                                head --;
-                                body --;
                             }
-                            else if(head == body-15){ //face up
-                                imageAdapter.mThumbIds[head-15] = 9;
+                            else if(head == body-15) { //face up
 
-                                //4 corners
-                                imageAdapter.mThumbIds[(body-14)-15] = 8; //set the whole body
-                                imageAdapter.mThumbIds[(body-16)-15] = 8;
-                                imageAdapter.mThumbIds[(body+14)-15] = 8;
-                                imageAdapter.mThumbIds[(body+16)-15] = 8;
+                                head = movementController.turnRightwhenFaceUp(head, body);
 
-                                //the rest
-                                imageAdapter.mThumbIds[(body)-15] = 8;
-                                imageAdapter.mThumbIds[(body-1)-15] = 8;
-                                imageAdapter.mThumbIds[(body+15)-15] = 8;
-                                imageAdapter.mThumbIds[(body+1)-15] = 8;
-
-                                //convert back of robot to explored
-                                imageAdapter.mThumbIds[(body+14)] = 1;
-                                imageAdapter.mThumbIds[(body+15)] = 1;
-                                imageAdapter.mThumbIds[(body+16)] = 1;
-                                head -= 15;
-                                body -= 15;
                             }
                             else{ //face down
-                                imageAdapter.mThumbIds[head+15] = 9;
-
-                                //4 corners
-                                imageAdapter.mThumbIds[(body-14)+15] = 8; //set the whole body
-                                imageAdapter.mThumbIds[(body-16)+15] = 8;
-                                imageAdapter.mThumbIds[(body+14)+15] = 8;
-                                imageAdapter.mThumbIds[(body+16)+15] = 8;
-
-                                //the rest
-                                imageAdapter.mThumbIds[(body)+15] = 8;
-                                imageAdapter.mThumbIds[(body-1)+15] = 8;
-                                imageAdapter.mThumbIds[(body+1)+15] = 8;
-                                imageAdapter.mThumbIds[(body-15)+15] = 8;
-
-                                //convert back of robot to explored
-                                imageAdapter.mThumbIds[(body-14)] = 1;
-                                imageAdapter.mThumbIds[(body-15)] = 1;
-                                imageAdapter.mThumbIds[(body-16)] = 1;
-                                head +=15;
-                                body +=15;
+                                head = movementController.turnRightwhenFaceDown(head, body);
                             }
-                        }
-                        else{
-                            Toast.makeText(fragmentBelongActivity, "Out of bound!", Toast.LENGTH_SHORT).show();
-                        }
-                        break;
+                            break;
+
+                        case DirectionView.DIRECTION_LEFT:
+                            if(head == body+1){ //face right
+                                head = movementController.turnLeftwhenFaceRight(head, body);
+                            }
+                            else if(head == body-1) { //face left
+                                head = movementController.turnLeftwhenFaceLeft(head, body);
+                            }
+                            else if(head == body-15) { //face up
+                                head = movementController.turnLeftwhenFaceUp(head, body);
+                            }
+                            else{ //face down
+                                head = movementController.turnLeftwhenFaceDown(head, body);
+                            }
+                            break;
+                        case DirectionView.DIRECTION_UP: //move forward
+                            if((head%15>=1 && head%15<=13) && (Math.abs(head/15) >=1 && Math.abs(head/15) <=18)){
+
+                                if(head == body+1){ //face right
+                                    movementController.moveForwardWhenFaceRight(head, body);
+                                    //increase current of head and body by 1 grid forward
+                                    head ++;
+                                    body++;
+                                }
+                                else if(head == body-1){ //face left
+                                    movementController.moveForwardWhenFaceLeft(head, body);
+                                    //increase current of head and body by 1 grid forward
+                                    head --;
+                                    body --;
+                                }
+                                else if(head == body-15){ //face up
+                                    movementController.moveForwardWhenFaceUp(head, body);
+                                    //increase current of head and body by 1 grid forward
+                                    head -= 15;
+                                    body -= 15;
+                                }
+                                else{ //face down
+                                    movementController.moveForwardWhenFaceDown(head, body);
+                                    //increase current of head and body by 1 grid forward
+                                    head +=15;
+                                    body +=15;
+                                }
+                            }
+                            else{
+                                Toast.makeText(fragmentBelongActivity, "Out of bound!", Toast.LENGTH_SHORT).show();
+                            }
+                            break;
+                    }
+                    imageAdapter.notifyDataSetChanged();
+
                 }
-                imageAdapter.notifyDataSetChanged();
+                else{
+                    Toast.makeText(fragmentBelongActivity, "Robot position not set!", Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
 
@@ -302,7 +217,6 @@ public class RobotFragment extends Fragment {
         });
 
         //set auto buttons to invisible
-
         buttonStart.setVisibility(View.INVISIBLE);
         buttonStart.setActivated(false);
         buttonStop.setVisibility(View.INVISIBLE);
