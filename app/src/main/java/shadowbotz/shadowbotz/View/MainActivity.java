@@ -178,9 +178,11 @@ public class MainActivity extends AppCompatActivity {
                         break;
                 }
             } else if (msg.what == Config.MESSAGE_WRITE) {
+                // Send a message to connected bluetooth device
                 byte[] writeBuf = (byte[]) msg.obj;
                 String writeMessage = new String(writeBuf);
 
+                // Save message in realm
                 realm.beginTransaction();
                 BluetoothMessage bluetoothMessage = new BluetoothMessage();
                 bluetoothMessage.setDeviceName(Config.paired_device_name);
@@ -192,11 +194,12 @@ public class MainActivity extends AppCompatActivity {
                 Config.sent_message = writeMessage;
 
                 MainActivity.bluetoothSubject.postMessage(writeMessage, "RECEIVED");
-
             } else if (msg.what == Config.MESSAGE_READ) {
+                // Receive a message to connected bluetooth device
                 byte[] readBuf = (byte[]) msg.obj;
                 String readMessage = new String(readBuf, 0, msg.arg1);
 
+                // Save message in realm
                 realm.beginTransaction();
                 BluetoothMessage bluetoothMessage = new BluetoothMessage();
                 bluetoothMessage.setDeviceName("");
@@ -216,6 +219,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    // Method to send message out to Raspberry Pi or AMD Tool
     public static void sendMessage(String message) {
         if(mChatService != null) {
             // Check that there's actually something to send
