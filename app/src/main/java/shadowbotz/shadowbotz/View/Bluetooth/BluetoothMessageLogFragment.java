@@ -117,7 +117,7 @@ public class BluetoothMessageLogFragment extends Fragment implements Observer {
 
     private void sendMessage(String message) {
         if(Config.current_bluetooth_state.equals(
-                getString(R.string.title_connected_to, Config.paired_device_name))) {
+                getString(R.string.title_bluetooth_connected_to, Config.paired_device_name))) {
             MainActivity.sendMessage(message);
         }
         else {

@@ -36,7 +36,7 @@
                 android:id="@+id/title_paired_devices"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/title_paired_devices"/>
+                android:text="@string/title_bluetooth_paired_devices"/>
 
             <ListView
                 android:id="@+id/paired_devices"
@@ -56,7 +56,7 @@
                 android:id="@+id/title_new_devices"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/title_other_devices"
+                android:text="@string/title_bluetooth_other_devices"
                 android:visibility="invisible" />
 
             <ListView
@@ -80,5 +80,5 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:text="@string/button_scan" />
+        android:text="@string/button_bluetooth_scan" />
 </RelativeLayout>

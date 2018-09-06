@@ -102,7 +102,7 @@ public class DeviceListActivity extends AppCompatActivity {
                 pairedDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress());
             }
         } else {
-            String noDevices = getResources().getText(R.string.none_paired).toString();
+            String noDevices = getResources().getText(R.string.bluetooth_unpaired).toString();
             pairedDevicesArrayAdapter.add(noDevices);
         }
     }
@@ -178,7 +178,7 @@ public class DeviceListActivity extends AppCompatActivity {
                 progressBarForNewDevices.setVisibility(View.GONE);
 
                 if (mNewDevicesArrayAdapter.getCount() == 0) {
-                    String noDevices = getResources().getText(R.string.none_found).toString();
+                    String noDevices = getResources().getText(R.string.bluetooth_none_found).toString();
                     mNewDevicesArrayAdapter.add(noDevices);
                 }
 

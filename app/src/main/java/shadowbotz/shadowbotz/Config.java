@@ -25,6 +25,7 @@ public class Config {
     public static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
     public static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
     public static final int REQUEST_ENABLE_BT = 3;
+    public static final int REQUEST_ACCESS_FINE_LOCATION = 4;
 
     public static String current_bluetooth_state = "";
     public static String paired_device_name = "";

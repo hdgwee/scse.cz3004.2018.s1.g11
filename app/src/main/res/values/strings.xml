@@ -1,32 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">shadowbotz</string>
     <string name="action_bluetooth_log">Bluetooth Log</string>
+    <string name="action_settings">Settings</string>
+    <string name="bluetooth_discoverable">Enable Discovery</string>
+    <string name="bluetooth_nearby_devices">Nearby Devices</string>
+    <string name="bluetooth_none_found">No devices found</string>
+    <string name="bluetooth_not_connected">You are not connected to a device</string>
+    <string name="bluetooth_not_enabled">Please enable Bluetooth to continue…</string>
+    <string name="bluetooth_unpaired">No devices have been paired</string>
+    <string name="button_bluetooth_scan">Scan for devices</string>
+    <string name="insecure_connect">Connect a device - Insecure</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="persistent_storage">Persistent Storage</string>
+    <string name="refresh">Refresh</string>
+    <string name="secure_connect">Connect a device - Secure</string>
+    <string name="send">Send</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
-    <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
     <string name="title_activity_bluetooth_log">Bluetooth Log</string>
     <string name="title_activity_bluetooth_pairing">Bluetooth Pairing Setup</string>
-    <string name="refresh">Refresh</string>
-    <string name="nearby_devices">Nearby Devices</string>
-    <string name="title_activity_bluetooth_chat">BluetoothChat</string>
-    <string name="not_connected">You are not connected to a device</string>
-    <string name="bt_not_enabled_leaving">Bluetooth was not enabled. Leaving Bluetooth Chat.</string>
-    <string name="title_connecting">connecting...</string>
-    <string name="title_connected_to">Connected to <xliff:g id="device_name">%1$s</xliff:g></string>
-    <string name="title_not_connected">Disconnected</string>
-    <string name="send">Send</string>
-    <string name="secure_connect">Connect a device - Secure</string>
-    <string name="insecure_connect">Connect a device - Insecure</string>
-    <string name="discoverable">Enable Discovery</string>
-    <string name="none_paired">No devices have been paired</string>
-    <string name="none_found">No devices found</string>
-    <string name="title_paired_devices">Paired Devices</string>
-    <string name="title_other_devices">Other Available Devices</string>
-    <string name="button_scan">Scan for devices</string>
-    <string name="persistent_storage">Persistent Storage</string>
+    <string name="title_bluetooth_connected_to">Connected to <xliff:g id="device_name">%1$s</xliff:g></string>
+    <string name="title_bluetooth_connecting">Connecting…</string>
+    <string name="title_bluetooth_disconnected">Disconnected</string>
+    <string name="title_bluetooth_listening">"Listening for Bluetooth Device"</string>
+    <string name="title_bluetooth_other_devices">Other Available Devices</string>
+    <string name="title_bluetooth_paired_devices">Paired Devices</string>
 </resources>

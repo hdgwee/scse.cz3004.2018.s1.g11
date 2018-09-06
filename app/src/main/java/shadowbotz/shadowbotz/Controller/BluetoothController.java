@@ -9,13 +9,6 @@ import shadowbotz.shadowbotz.Config;
 
 public class BluetoothController {
 
-    private static ComponentName bluetoothServiceComponent = null;
-
-    public static void requestUserToTurnOnBluetooth(Activity activity) {
-        Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-        activity.startActivityForResult(enableIntent, Config.REQUEST_ENABLE_BT);
-    }
-
     // Makes this device discoverable for 300 seconds (5 minutes)
     public static void turnOnDiscoverable(Activity activity) {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();

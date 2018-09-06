@@ -1,5 +1,6 @@
 package shadowbotz.shadowbotz.View;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -7,16 +8,23 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
+
+import java.util.Set;
 
 import io.realm.Realm;
 import shadowbotz.shadowbotz.BluetoothObserverSubject.BluetoothSubject;
@@ -39,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
     private Realm realm;
     private static BluetoothMessagingService bluetoothMessagingService = null;
     private BluetoothAdapter bluetoothAdapter;
+    private Set<BluetoothDevice> pairedDevices;
+    private BluetoothDevice device;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,14 +56,6 @@ public class MainActivity extends AppCompatActivity {
 
         Realm.init(getApplicationContext());
         realm = Realm.getDefaultInstance();
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-        if(bluetoothAdapter == null) {
-            // Device does not have Bluetooth
-        }
-        else if (!bluetoothAdapter.isEnabled()) {
-            BluetoothController.requestUserToTurnOnBluetooth(this);
-        }
 
         setContentView(R.layout.activity_main);
 
@@ -68,6 +70,112 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        requestForAccessFineLocationPermission();
+
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        if (bluetoothAdapter == null) {
+            // Device does not have Bluetooth
+        } else if (!bluetoothAdapter.isEnabled()) {
+            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableIntent, Config.REQUEST_ENABLE_BT);
+        }
+
+        if (bluetoothAdapter != null) {
+            pairedDevices = bluetoothAdapter.getBondedDevices();
+        }
+
+        bluetoothMessagingService = new BluetoothMessagingService(null, mHandler);
+        bluetoothMessagingService.start();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case Config.REQUEST_CONNECT_DEVICE_SECURE:
+                // When DeviceListActivity returns with a device to connect
+                if (resultCode == Activity.RESULT_OK) {
+                    String address = "";
+
+                    // Get the device MAC address
+                    if (data.getExtras() != null) {
+                        address = data.getExtras().getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+                    }
+
+                    device = bluetoothAdapter.getRemoteDevice(address);
+                    for (BluetoothDevice bt : pairedDevices) {
+                        if (bt.getAddress().equals(device.getAddress())) {
+                            Config.paired_device_name = device.getName();
+                            break;
+                        }
+                    }
+
+                    if(Config.paired_device_name.length() == 0) {
+                        Config.paired_device_name = device.getAddress();
+                    }
+
+                    bluetoothMessagingService.connect(device, true);
+                }
+                break;
+            case Config.REQUEST_CONNECT_DEVICE_INSECURE:
+                // When DeviceListActivity returns with a device to connect
+                if (resultCode == Activity.RESULT_OK) {
+                    String address = "";
+
+                    // Get the device MAC address
+                    if (data.getExtras() != null) {
+                        address = data.getExtras().getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+                    }
+
+                    device = bluetoothAdapter.getRemoteDevice(address);
+                    for (BluetoothDevice bt : pairedDevices) {
+                        if (bt.getAddress().equals(device.getAddress())) {
+                            Config.paired_device_name = device.getName();
+                            break;
+                        }
+                    }
+
+                    if(Config.paired_device_name.length() == 0) {
+                        Config.paired_device_name = device.getAddress();
+                    }
+
+                    bluetoothMessagingService.connect(device, true);
+                }
+                break;
+            case Config.REQUEST_ENABLE_BT:
+                // When the request to enable Bluetooth returns
+                if (resultCode == Activity.RESULT_OK) {
+                    // Bluetooth is now enabled
+                } else {
+                    // User did not enable Bluetooth or an error occurred
+                    Toast.makeText(this, R.string.bluetooth_not_enabled,
+                            Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        switch (requestCode) {
+            case Config.REQUEST_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                } else {
+                    Toast.makeText(this
+                            , "Please enable \"Access Fine Location\" permission to continue..."
+                            , Toast.LENGTH_LONG).show();
+                    finish();
+                }
+            }
+        }
     }
 
     @Override
@@ -77,6 +185,11 @@ public class MainActivity extends AppCompatActivity {
         if (bluetoothMessagingService != null) {
             bluetoothMessagingService.stop();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     @Override
@@ -92,24 +205,20 @@ public class MainActivity extends AppCompatActivity {
 
         if (id == R.id.action_settings) {
             return true;
-        }
-        else if (id == R.id.secure_connect_scan) {
+        } else if (id == R.id.secure_connect_scan) {
             // Launch the DeviceListActivity to see devices and do scan
             Intent serverIntent = new Intent(this, DeviceListActivity.class);
             startActivityForResult(serverIntent, Config.REQUEST_CONNECT_DEVICE_SECURE);
             return true;
-        }
-        else if (id == R.id.persistent_storage) {
+        } else if (id == R.id.persistent_storage) {
             // Open persistent string dialog for user input
             PersistentController.f1AndF2Dialog(this);
             return true;
-        }
-        else if (id == R.id.action_bluetooth_log) {
+        } else if (id == R.id.action_bluetooth_log) {
             Intent intent = new Intent(getApplicationContext(), BluetoothActivity.class);
             startActivity(intent);
             return true;
-        }
-        else if (id == R.id.discoverable) {
+        } else if (id == R.id.discoverable) {
             // Ensure this device is discoverable by others
             BluetoothController.turnOnDiscoverable(this);
             return true;
@@ -118,71 +227,31 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case Config.REQUEST_CONNECT_DEVICE_SECURE:
-                // When DeviceListActivity returns with a device to connect
-                if (resultCode == Activity.RESULT_OK) {
-                    String address = "";
-
-                    // Get the device MAC address
-                    if(data.getExtras() != null) {
-                        address = data.getExtras().getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
-                    }
-
-                    BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
-
-                    bluetoothMessagingService = new BluetoothMessagingService(null, mHandler);
-                    bluetoothMessagingService.connect(device, true);
-                }
-                break;
-            case Config.REQUEST_CONNECT_DEVICE_INSECURE:
-                // When DeviceListActivity returns with a device to connect
-                if (resultCode == Activity.RESULT_OK) {
-                    String address = "";
-
-                    // Get the device MAC address
-                    if(data.getExtras() != null) {
-                        address = data.getExtras().getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
-                    }
-
-                    BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
-
-                    bluetoothMessagingService = new BluetoothMessagingService(null, mHandler);
-                    bluetoothMessagingService.connect(device, true);
-                }
-                break;
-            case Config.REQUEST_ENABLE_BT:
-                // When the request to enable Bluetooth returns
-                if (resultCode == Activity.RESULT_OK) {
-                    // Bluetooth is now enabled
-                } else {
-                    // User did not enable Bluetooth or an error occurred
-                    Toast.makeText(this, R.string.bt_not_enabled_leaving,
-                            Toast.LENGTH_SHORT).show();
-                }
-        }
-    }
-
     @SuppressLint("HandlerLeak")
     private final Handler mHandler = new Handler() {
         @SuppressLint("StringFormatInvalid")
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == Config.MESSAGE_STATE_CHANGE) {
-                switch (msg.arg1) {
-                    case BluetoothMessagingService.STATE_CONNECTED:
-                        Config.current_bluetooth_state = getString(R.string.title_connected_to, Config.paired_device_name);
-                        break;
-                    case BluetoothMessagingService.STATE_CONNECTING:
-                        Config.current_bluetooth_state = getString(R.string.title_connecting);
-                        break;
-                    case BluetoothMessagingService.STATE_LISTEN:
-                        break;
-                    case BluetoothMessagingService.STATE_NONE:
-                        Config.current_bluetooth_state = getString(R.string.title_not_connected);
-                        break;
+                if (msg.arg1 == BluetoothMessagingService.STATE_CONNECTED) {
+                    Config.current_bluetooth_state = getString(R.string.title_bluetooth_connected_to, Config.paired_device_name);
                 }
+                else if (msg.arg1 == BluetoothMessagingService.STATE_CONNECTING) {
+                    Config.current_bluetooth_state = getString(R.string.title_bluetooth_connecting);
+                }
+                else if (msg.arg1 == BluetoothMessagingService.STATE_LISTEN) {
+                    Config.current_bluetooth_state = getString(R.string.title_bluetooth_listening);
+                }
+                else if (msg.arg1 == BluetoothMessagingService.STATE_NONE) {
+                    Config.current_bluetooth_state = getString(R.string.title_bluetooth_disconnected);
+                }
+
+                ActionBar actionBar = getSupportActionBar();
+
+                if (actionBar != null) {
+                    actionBar.setTitle("shadowbotz - " + Config.current_bluetooth_state);
+                }
+
             } else if (msg.what == Config.MESSAGE_WRITE) {
                 // Send a message to connected bluetooth device
                 byte[] writeBuf = (byte[]) msg.obj;
@@ -225,9 +294,43 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private void requestForAccessFineLocationPermission() {
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Permission is not granted
+            // Should we show an explanation?
+
+            // if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+            //         Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+            // Show an explanation to the user *asynchronously* -- don't block
+            // this thread waiting for the user's response! After the user
+            // sees the explanation, try again to request the permission.
+
+            // } else {
+
+            // No explanation needed; request the permission
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    Config.REQUEST_ACCESS_FINE_LOCATION);
+
+            // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+            // app-defined int constant. The callback method gets the
+            // result of the request.
+
+            // }
+        }
+        // else {
+        // Permission has already been granted
+        // }
+    }
+
     // Method to send message out to Raspberry Pi or AMD Tool
     public static void sendMessage(String message) {
-        if(bluetoothMessagingService != null) {
+        if (bluetoothMessagingService != null) {
             // Check that there's actually something to send
             if (message.length() > 0) {
                 // Get the message bytes and tell the BluetoothMessagingService to write
