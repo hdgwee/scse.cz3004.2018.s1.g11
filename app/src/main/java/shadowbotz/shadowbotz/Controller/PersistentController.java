@@ -18,7 +18,7 @@ public class PersistentController {
     }
 
     //Function to save word to shared preferences
-    public void f1AndF2Dialog(Activity activity){
+    public static void f1AndF2Dialog(Activity activity){
         final SharedPreferences sharedPreferences = activity.getSharedPreferences(Config.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
         AlertDialog.Builder alert = new AlertDialog.Builder(activity, AlertDialog.THEME_DEVICE_DEFAULT_DARK);

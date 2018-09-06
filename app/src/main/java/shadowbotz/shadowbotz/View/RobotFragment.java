@@ -269,7 +269,7 @@ public class RobotFragment extends Fragment {
         buttonL1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO: implement send over bluetooth
+                MainActivity.sendMessage(sharedPreferences.getString(Config.F1_BUTTON, ""));
                 Toast.makeText(fragmentBelongActivity, sharedPreferences.getString(Config.F1_BUTTON, ""), Toast.LENGTH_SHORT).show();
             }
         });
@@ -277,7 +277,7 @@ public class RobotFragment extends Fragment {
         buttonL2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO: implement send over bluetooth
+                MainActivity.sendMessage(sharedPreferences.getString(Config.F2_BUTTON, ""));
                 Toast.makeText(fragmentBelongActivity, sharedPreferences.getString(Config.F2_BUTTON, ""), Toast.LENGTH_SHORT).show();
             }
         });

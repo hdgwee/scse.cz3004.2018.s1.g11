@@ -32,11 +32,6 @@
             android:label="@string/title_activity_bluetooth_pairing"
             android:screenOrientation="landscape"
             android:theme="@style/AppTheme" />
-        <activity
-            android:name=".View.Bluetooth.PersistentStorageActivity"
-            android:label="@string/title_activity_persistent_storage"
-            android:screenOrientation="landscape"
-            android:theme="@style/AppTheme" />
     </application>
 
 </manifest>

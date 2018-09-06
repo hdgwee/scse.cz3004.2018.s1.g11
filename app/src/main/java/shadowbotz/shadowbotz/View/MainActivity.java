@@ -22,12 +22,12 @@ import io.realm.Realm;
 import shadowbotz.shadowbotz.BluetoothObserverSubject.BluetoothSubject;
 import shadowbotz.shadowbotz.Config;
 import shadowbotz.shadowbotz.Controller.BluetoothController;
+import shadowbotz.shadowbotz.Controller.PersistentController;
 import shadowbotz.shadowbotz.Model.BluetoothMessage;
 import shadowbotz.shadowbotz.R;
 import shadowbotz.shadowbotz.Service.BluetoothMessagingService;
 import shadowbotz.shadowbotz.View.Bluetooth.BluetoothActivity;
 import shadowbotz.shadowbotz.View.Bluetooth.DeviceListActivity;
-import shadowbotz.shadowbotz.View.Bluetooth.PersistentStorageActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     // PersistentController persistentController = new PersistentController(); //TODO: to test sharedpreference
 
     private Realm realm;
-    private static BluetoothMessagingService mChatService = null;
+    private static BluetoothMessagingService bluetoothMessagingService = null;
     private BluetoothAdapter bluetoothAdapter;
 
     @Override
@@ -47,6 +47,13 @@ public class MainActivity extends AppCompatActivity {
         Realm.init(getApplicationContext());
         realm = Realm.getDefaultInstance();
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        if(bluetoothAdapter == null) {
+            // Device does not have Bluetooth
+        }
+        else if (!bluetoothAdapter.isEnabled()) {
+            BluetoothController.requestUserToTurnOnBluetooth(this);
+        }
 
         setContentView(R.layout.activity_main);
 
@@ -67,8 +74,8 @@ public class MainActivity extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
 
-        if (mChatService != null) {
-            mChatService.stop();
+        if (bluetoothMessagingService != null) {
+            bluetoothMessagingService.stop();
         }
     }
 
@@ -93,9 +100,8 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         else if (id == R.id.persistent_storage) {
-            // Launch the DeviceListActivity to see devices and do scan
-            Intent intent = new Intent(this, PersistentStorageActivity.class);
-            startActivity(intent);
+            // Open persistent string dialog for user input
+            PersistentController.f1AndF2Dialog(this);
             return true;
         }
         else if (id == R.id.action_bluetooth_log) {
@@ -126,8 +132,8 @@ public class MainActivity extends AppCompatActivity {
 
                     BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
 
-                    mChatService = new BluetoothMessagingService(null, mHandler);
-                    mChatService.connect(device, true);
+                    bluetoothMessagingService = new BluetoothMessagingService(null, mHandler);
+                    bluetoothMessagingService.connect(device, true);
                 }
                 break;
             case Config.REQUEST_CONNECT_DEVICE_INSECURE:
@@ -142,8 +148,8 @@ public class MainActivity extends AppCompatActivity {
 
                     BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
 
-                    mChatService = new BluetoothMessagingService(null, mHandler);
-                    mChatService.connect(device, true);
+                    bluetoothMessagingService = new BluetoothMessagingService(null, mHandler);
+                    bluetoothMessagingService.connect(device, true);
                 }
                 break;
             case Config.REQUEST_ENABLE_BT:
@@ -221,12 +227,12 @@ public class MainActivity extends AppCompatActivity {
 
     // Method to send message out to Raspberry Pi or AMD Tool
     public static void sendMessage(String message) {
-        if(mChatService != null) {
+        if(bluetoothMessagingService != null) {
             // Check that there's actually something to send
             if (message.length() > 0) {
                 // Get the message bytes and tell the BluetoothMessagingService to write
                 byte[] send = message.getBytes();
-                mChatService.write(send);
+                bluetoothMessagingService.write(send);
             }
         }
     }
