@@ -18,7 +18,7 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="persistent_storage">Persistent Storage</string>
     <string name="refresh">Refresh</string>
-    <string name="secure_connect">Connect a device - Secure</string>
+    <string name="secure_connect">Connect a device</string>
     <string name="send">Send</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>

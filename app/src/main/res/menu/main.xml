@@ -27,8 +27,8 @@
         android:title="@string/action_bluetooth_log"
         app:showAsAction="never" />
 
-    <item
+    <!--<item
         android:id="@+id/action_settings"
         android:title="@string/action_settings"
-        app:showAsAction="never" />
+        app:showAsAction="never" />-->
 </menu>

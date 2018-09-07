@@ -59,14 +59,14 @@ public class BluetoothMessageLogFragment extends Fragment implements Observer {
         setHasOptionsMenu(true);
     }
 
+    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_bluetooth_message, container, false);
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(View view, Bundle savedInstanceState) {
         listViewForMessage = view.findViewById(R.id.listViewForMessage);
         editTextOutgoingMessage = view.findViewById(R.id.editTextOutgoingMessage);
         buttonSend = view.findViewById(R.id.buttonSend);

@@ -41,8 +41,8 @@ public class MainActivity extends AppCompatActivity {
 
     public static BluetoothSubject bluetoothSubject = new BluetoothSubject();
 
-    public SharedPreferences sharedPreferences; //TODO: to test sharedpreference
-    // PersistentController persistentController = new PersistentController(); //TODO: to test sharedpreference
+    public SharedPreferences sharedPreferences;
+    // PersistentController persistentController = new PersistentController();
 
     private Realm realm;
     private static BluetoothMessagingService bluetoothMessagingService = null;
@@ -59,14 +59,14 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        sharedPreferences = getSharedPreferences(Config.SHARED_PREF_NAME, Context.MODE_PRIVATE); //TODO: to test sharedpreference
-        // persistentController.f1Andf2Button(BluetoothActivity.this, Config.F1_BUTTON, "testing"); //TODO: to test sharedpreference
+        sharedPreferences = getSharedPreferences(Config.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        // persistentController.f1Andf2Button(BluetoothActivity.this, Config.F1_BUTTON, "testing");
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, sharedPreferences.getString(Config.F1_BUTTON, ""), Snackbar.LENGTH_LONG) //TODO: to test sharedpreference
+                Snackbar.make(view, sharedPreferences.getString(Config.F1_BUTTON, ""), Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
@@ -203,9 +203,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_settings) {
-            return true;
-        } else if (id == R.id.secure_connect_scan) {
+        if (id == R.id.secure_connect_scan) {
             // Launch the DeviceListActivity to see devices and do scan
             Intent serverIntent = new Intent(this, DeviceListActivity.class);
             startActivityForResult(serverIntent, Config.REQUEST_CONNECT_DEVICE_SECURE);

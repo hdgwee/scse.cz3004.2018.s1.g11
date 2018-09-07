@@ -69,9 +69,9 @@ public class ImageAdapter extends BaseAdapter {
                 imageView.setImageResource(R.drawable.tile_robot_head);
                 break;
         }
-        imageView.setLayoutParams(new ViewGroup.LayoutParams(GridView.LayoutParams.MATCH_PARENT, GridView.LayoutParams.MATCH_PARENT));
+        // imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         imageView.setPadding(0, 0, 0, 0);
-//        imageView.setAdjustViewBounds(true);
+       imageView.setAdjustViewBounds(true);
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         return imageView;
     }

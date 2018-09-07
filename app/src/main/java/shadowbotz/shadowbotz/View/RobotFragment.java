@@ -13,9 +13,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.andretietz.android.controller.DirectionView;
@@ -47,7 +47,7 @@ public class RobotFragment extends Fragment {
         final Button buttonStart = view.findViewById(R.id.buttonStart);
         final Button buttonStop = view.findViewById(R.id.buttonStop);
 
-        final EditText leftEditText = view.findViewById(R.id.editTextLeft);
+        final TextView statusTextView = view.findViewById(R.id.statusTextView);
 
         Button buttonL1 = view.findViewById(R.id.buttonL1);
         Button buttonL2 = view.findViewById(R.id.buttonL2);
@@ -58,9 +58,6 @@ public class RobotFragment extends Fragment {
 
         //for onCreateOptionsMenu
         setHasOptionsMenu(true);
-
-        EditText statusEditText = view.findViewById(R.id.editTextLeft);
-        statusEditText.setEnabled(false);
 
         GridView gridview = (GridView) view.findViewById(R.id.gridview);
         gridview.setAdapter(imageAdapter);
@@ -97,9 +94,14 @@ public class RobotFragment extends Fragment {
         gridview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() { //set way point
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Toast.makeText(fragmentBelongActivity,  Math.abs(i/15)+", "+i%15, Toast.LENGTH_SHORT).show();
-                leftEditText.setText("Way point: " +Math.abs(i/15)+", "+i%15); //to edit the left fragment
-                return false;
+                if (count==0){
+                    Toast.makeText(fragmentBelongActivity,  Math.abs(i/15)+", "+i%15, Toast.LENGTH_SHORT).show();
+                    statusTextView.setText("Way point: " +Math.abs(i/15)+", "+i%15);
+                }
+                else{
+                    Toast.makeText(fragmentBelongActivity, "Please set initial position of robot first!", Toast.LENGTH_SHORT).show();
+                }
+                return true;
             }
         });
 
