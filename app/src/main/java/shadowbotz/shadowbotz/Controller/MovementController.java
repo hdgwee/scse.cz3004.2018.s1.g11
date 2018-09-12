@@ -1,7 +1,10 @@
 package shadowbotz.shadowbotz.Controller;
 
+import shadowbotz.shadowbotz.View.MainActivity;
+
 public class MovementController {
     ImageAdapter imageAdapter;
+
 
     public MovementController(ImageAdapter imageAdapter) {
         this.imageAdapter = imageAdapter;
@@ -159,6 +162,45 @@ public class MovementController {
         imageAdapter.mThumbIds[(body-14)] = 1;
         imageAdapter.mThumbIds[(body-15)] = 1;
         imageAdapter.mThumbIds[(body-16)] = 1;
+    }
+
+
+    public void turnLeft(int head, int body){
+        if(head == body+1){ //face right
+            head = turnLeftwhenFaceRight(head, body);
+        }
+        else if(head == body-1) { //face left
+            head = turnLeftwhenFaceLeft(head, body);
+        }
+        else if(head == body-15) { //face up
+            head = turnLeftwhenFaceUp(head, body);
+        }
+        else{ //face down
+            head = turnLeftwhenFaceDown(head, body);
+        }
+    }
+
+    public void moveForward(int head, int body){
+
+    }
+
+    public void turnRight(int head, int body){
+        if(head == body+1){ //face right
+            head = turnRightwhenFaceRight(head, body);
+            MainActivity.sendMessage("tr");
+        }
+        else if(head == body-1) { //face left
+            head = turnRightwhenFaceLeft(head, body);
+
+        }
+        else if(head == body-15) { //face up
+
+            head = turnRightwhenFaceUp(head, body);
+
+        }
+        else{ //face down
+            head = turnRightwhenFaceDown(head, body);
+        }
     }
 
 }

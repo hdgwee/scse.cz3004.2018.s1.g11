@@ -7,6 +7,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,20 +22,32 @@ import android.widget.Toast;
 import com.andretietz.android.controller.DirectionView;
 import com.andretietz.android.controller.InputView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import shadowbotz.shadowbotz.BluetoothObserverSubject.Observer;
+import shadowbotz.shadowbotz.BluetoothObserverSubject.Subject;
 import shadowbotz.shadowbotz.Config;
 import shadowbotz.shadowbotz.Controller.ImageAdapter;
 import shadowbotz.shadowbotz.Controller.MovementController;
 import shadowbotz.shadowbotz.R;
 
-public class RobotFragment extends Fragment {
+public class RobotFragment extends Fragment implements Observer {
 
 
     private int count = 2;
     private int head, body;
+    // Observer pattern
+    private Subject topic;
+    private MovementController movementController;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_robot, container, false);
+
+        // Observer pattern
+        MainActivity.bluetoothSubject.register(this);
+        this.setSubject(MainActivity.bluetoothSubject);
 
         // Get Fragment belonged Activity
         final FragmentActivity fragmentBelongActivity = getActivity();
@@ -54,7 +67,7 @@ public class RobotFragment extends Fragment {
 
         final ImageAdapter imageAdapter = new ImageAdapter(fragmentBelongActivity);
 
-        final MovementController movementController = new MovementController(imageAdapter);
+        movementController = new MovementController(imageAdapter);
 
         //for onCreateOptionsMenu
         setHasOptionsMenu(true);
@@ -116,71 +129,14 @@ public class RobotFragment extends Fragment {
                             Toast.makeText(fragmentBelongActivity, "Not in use!", Toast.LENGTH_SHORT).show();
                             break;
                         case DirectionView.DIRECTION_RIGHT:
-
-                            if(head == body+1){ //face right
-                                head = movementController.turnRightwhenFaceRight(head, body);
-
-                            }
-                            else if(head == body-1) { //face left
-
-                                head = movementController.turnRightwhenFaceLeft(head, body);
-
-                            }
-                            else if(head == body-15) { //face up
-
-                                head = movementController.turnRightwhenFaceUp(head, body);
-
-                            }
-                            else{ //face down
-                                head = movementController.turnRightwhenFaceDown(head, body);
-                            }
+                            movementController.turnRight(head, body);
                             break;
 
                         case DirectionView.DIRECTION_LEFT:
-                            if(head == body+1){ //face right
-                                head = movementController.turnLeftwhenFaceRight(head, body);
-                            }
-                            else if(head == body-1) { //face left
-                                head = movementController.turnLeftwhenFaceLeft(head, body);
-                            }
-                            else if(head == body-15) { //face up
-                                head = movementController.turnLeftwhenFaceUp(head, body);
-                            }
-                            else{ //face down
-                                head = movementController.turnLeftwhenFaceDown(head, body);
-                            }
+                            movementController.turnLeft(head, body);
                             break;
                         case DirectionView.DIRECTION_UP: //move forward
-                            if((head%15>=1 && head%15<=13) && (Math.abs(head/15) >=1 && Math.abs(head/15) <=18)){
 
-                                if(head == body+1){ //face right
-                                    movementController.moveForwardWhenFaceRight(head, body);
-                                    //increase current of head and body by 1 grid forward
-                                    head ++;
-                                    body++;
-                                }
-                                else if(head == body-1){ //face left
-                                    movementController.moveForwardWhenFaceLeft(head, body);
-                                    //increase current of head and body by 1 grid forward
-                                    head --;
-                                    body --;
-                                }
-                                else if(head == body-15){ //face up
-                                    movementController.moveForwardWhenFaceUp(head, body);
-                                    //increase current of head and body by 1 grid forward
-                                    head -= 15;
-                                    body -= 15;
-                                }
-                                else{ //face down
-                                    movementController.moveForwardWhenFaceDown(head, body);
-                                    //increase current of head and body by 1 grid forward
-                                    head +=15;
-                                    body +=15;
-                                }
-                            }
-                            else{
-                                Toast.makeText(fragmentBelongActivity, "Out of bound!", Toast.LENGTH_SHORT).show();
-                            }
                             break;
                     }
                     imageAdapter.notifyDataSetChanged();
@@ -285,6 +241,48 @@ public class RobotFragment extends Fragment {
         });
 
         return view;
+    }
+
+    @Override
+    public void update() {
+        String stringMessage = (String) topic.getUpdate(this);
+
+        JSONObject msg = null;
+        try {
+            msg = new JSONObject(stringMessage);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        // Todo: Bug fix
+        if (msg != null) {
+            try {
+                // Todo: Unable to detect string send from AMD Tool bug
+                switch (msg.getString("status")) {
+                    case "moving right":
+                        Log.e("RobotFragmentMovement", "moving right");
+                        movementController.turnRight(head, body);
+                        break;
+                    case "moving left":
+                        Log.e("RobotFragmentMovement", "moving left");
+                        movementController.turnLeft(head, body);
+                        break;
+                    case "moving forward":
+                        break;
+                }
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+        else {
+            // No new message
+        }
+    }
+
+    @Override
+    public void setSubject(Subject sub) {
+        this.topic = sub;
     }
 
 }
