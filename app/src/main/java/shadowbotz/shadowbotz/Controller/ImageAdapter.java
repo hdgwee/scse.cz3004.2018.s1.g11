@@ -68,6 +68,13 @@ public class ImageAdapter extends BaseAdapter {
             case 9: //robot head tile
                 imageView.setImageResource(R.drawable.tile_robot_head);
                 break;
+            case 10: //unexplore waypoint tile
+                imageView.setImageResource(R.drawable.tile_waypoint_unexplored);
+                break;
+            case 11: //explore waypoint tile
+                imageView.setImageResource(R.drawable.tile_waypoint_explored);
+                break;
+
         }
         // imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         imageView.setPadding(0, 0, 0, 0);

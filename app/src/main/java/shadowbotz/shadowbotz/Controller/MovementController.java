@@ -1,205 +1,298 @@
 package shadowbotz.shadowbotz.Controller;
 
+import android.app.Activity;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import shadowbotz.shadowbotz.Model.Robot;
 import shadowbotz.shadowbotz.View.MainActivity;
 
 public class MovementController {
     ImageAdapter imageAdapter;
+    Activity callingActivity;
 
-
-    public MovementController(ImageAdapter imageAdapter) {
+    public MovementController(ImageAdapter imageAdapter, Activity callingActivity) {
         this.imageAdapter = imageAdapter;
+        this.callingActivity = callingActivity;
     }
 
-    public void setBody(int body){
-        imageAdapter.mThumbIds[body] = 8;
-        //4 corners
-        imageAdapter.mThumbIds[body-14] = 8; //set the whole body
-        imageAdapter.mThumbIds[body-16] = 8;
-        imageAdapter.mThumbIds[body+14] = 8;
-        imageAdapter.mThumbIds[body+16] = 8;
+    private void checkIfWaypointIsExplored(Robot robot){
+        if (!robot.isVisitedWaypoint()) {
+            if(     robot.getWaypointPosition() == robot.getBody()-14 ||
+                    robot.getWaypointPosition() == robot.getBody()-16 ||
+                    robot.getWaypointPosition() == robot.getBody()+14 ||
+                    robot.getWaypointPosition() == robot.getBody()+16 ||
+                    robot.getWaypointPosition() == robot.getBody()+1 ||
+                    robot.getWaypointPosition() == robot.getBody()-1 ||
+                    robot.getWaypointPosition() == robot.getBody()+15 ||
+                    robot.getWaypointPosition() == robot.getBody()-15 ||
+                    robot.getWaypointPosition() == robot.getBody()){
 
-        //the rest
-        imageAdapter.mThumbIds[body+1] = 8;
-        imageAdapter.mThumbIds[body-1] = 8;
-        imageAdapter.mThumbIds[body+15] = 8;
-        imageAdapter.mThumbIds[body-15] = 8;
-    }
-
-    public void setHead(int head){
-        imageAdapter.mThumbIds[head] = 9;
-    }
-
-    public int turnRightwhenFaceRight(int head, int body){
-        imageAdapter.mThumbIds[head] = 8;
-        head = body+15;
-        imageAdapter.mThumbIds[head] = 9;
-        return head;
-    }
-    public int turnRightwhenFaceLeft(int head, int body){
-        imageAdapter.mThumbIds[head] = 8;
-        head = body-15;
-        imageAdapter.mThumbIds[head] = 9;
-        return head;
-    }
-    public int turnRightwhenFaceUp(int head, int body){
-        imageAdapter.mThumbIds[head] = 8;
-        head = body+1;
-        imageAdapter.mThumbIds[head] = 9;
-        return head;
-    }
-    public int turnRightwhenFaceDown(int head, int body){
-        imageAdapter.mThumbIds[head] = 8;
-        head = body-1;
-        imageAdapter.mThumbIds[head] = 9;
-        return head;
-    }
-
-
-    public int turnLeftwhenFaceRight(int head, int body){
-        imageAdapter.mThumbIds[head] = 8;
-        head = body-15;
-        imageAdapter.mThumbIds[head] = 9;
-        return head;
-    }
-    public int turnLeftwhenFaceLeft(int head, int body){
-        imageAdapter.mThumbIds[head] = 8;
-        head = body+15;
-        imageAdapter.mThumbIds[head] = 9;
-        return head;
-    }
-    public int turnLeftwhenFaceUp(int head, int body){
-        imageAdapter.mThumbIds[head] = 8;
-        head = body-1;
-        imageAdapter.mThumbIds[head] = 9;
-        return head;
-    }
-    public int turnLeftwhenFaceDown(int head, int body){
-        imageAdapter.mThumbIds[head] = 8;
-        head = body+1;
-        imageAdapter.mThumbIds[head] = 9;
-        return head;
-    }
-
-    public void moveForwardWhenFaceRight(int head, int body){
-        imageAdapter.mThumbIds[head+1] = 9;
-
-        //4 corners
-        imageAdapter.mThumbIds[(body-14)+1] = 8; //set the whole body
-        imageAdapter.mThumbIds[(body-16)+1] = 8;
-        imageAdapter.mThumbIds[(body+14)+1] = 8;
-        imageAdapter.mThumbIds[(body+16)+1] = 8;
-
-        //the rest
-        imageAdapter.mThumbIds[(body)+1] = 8;
-        imageAdapter.mThumbIds[(body-1)+1] = 8;
-        imageAdapter.mThumbIds[(body+15)+1] = 8;
-        imageAdapter.mThumbIds[(body-15)+1] = 8;
-
-        //convert back of robot to explored
-        imageAdapter.mThumbIds[(body-1)] = 1;
-        imageAdapter.mThumbIds[(body-16)] = 1;
-        imageAdapter.mThumbIds[(body+14)] = 1;
-    }
-
-    public void moveForwardWhenFaceLeft(int head, int body){
-        imageAdapter.mThumbIds[head-1] = 9;
-
-        //4 corners
-        imageAdapter.mThumbIds[(body-14)-1] = 8; //set the whole body
-        imageAdapter.mThumbIds[(body-16)-1] = 8;
-        imageAdapter.mThumbIds[(body+14)-1] = 8;
-        imageAdapter.mThumbIds[(body+16)-1] = 8;
-
-        //the rest
-        imageAdapter.mThumbIds[(body)-1] = 8;
-        imageAdapter.mThumbIds[(body+1)-1] = 8;
-        imageAdapter.mThumbIds[(body+15)-1] = 8;
-        imageAdapter.mThumbIds[(body-15)-1] = 8;
-
-        //convert back of robot to explored
-        imageAdapter.mThumbIds[(body+1)] = 1;
-        imageAdapter.mThumbIds[(body+16)] = 1;
-        imageAdapter.mThumbIds[(body-14)] = 1;
-    }
-
-    public void moveForwardWhenFaceUp(int head, int body){
-        imageAdapter.mThumbIds[head-15] = 9;
-
-        //4 corners
-        imageAdapter.mThumbIds[(body-14)-15] = 8; //set the whole body
-        imageAdapter.mThumbIds[(body-16)-15] = 8;
-        imageAdapter.mThumbIds[(body+14)-15] = 8;
-        imageAdapter.mThumbIds[(body+16)-15] = 8;
-
-        //the rest
-        imageAdapter.mThumbIds[(body)-15] = 8;
-        imageAdapter.mThumbIds[(body-1)-15] = 8;
-        imageAdapter.mThumbIds[(body+15)-15] = 8;
-        imageAdapter.mThumbIds[(body+1)-15] = 8;
-
-        //convert back of robot to explored
-        imageAdapter.mThumbIds[(body+14)] = 1;
-        imageAdapter.mThumbIds[(body+15)] = 1;
-        imageAdapter.mThumbIds[(body+16)] = 1;
-    }
-
-    public void moveForwardWhenFaceDown(int head, int body){
-        imageAdapter.mThumbIds[head+15] = 9;
-
-        //4 corners
-        imageAdapter.mThumbIds[(body-14)+15] = 8; //set the whole body
-        imageAdapter.mThumbIds[(body-16)+15] = 8;
-        imageAdapter.mThumbIds[(body+14)+15] = 8;
-        imageAdapter.mThumbIds[(body+16)+15] = 8;
-
-        //the rest
-        imageAdapter.mThumbIds[(body)+15] = 8;
-        imageAdapter.mThumbIds[(body-1)+15] = 8;
-        imageAdapter.mThumbIds[(body+1)+15] = 8;
-        imageAdapter.mThumbIds[(body-15)+15] = 8;
-
-        //convert back of robot to explored
-        imageAdapter.mThumbIds[(body-14)] = 1;
-        imageAdapter.mThumbIds[(body-15)] = 1;
-        imageAdapter.mThumbIds[(body-16)] = 1;
-    }
-
-
-    public void turnLeft(int head, int body){
-        if(head == body+1){ //face right
-            head = turnLeftwhenFaceRight(head, body);
+                robot.setVisitedWaypoint(true);
+                imageAdapter.mThumbIds[robot.getWaypointPosition()] = 11;
+            }
         }
-        else if(head == body-1) { //face left
-            head = turnLeftwhenFaceLeft(head, body);
+        else{
+            imageAdapter.mThumbIds[robot.getWaypointPosition()] = 11;
         }
-        else if(head == body-15) { //face up
-            head = turnLeftwhenFaceUp(head, body);
+
+    }
+
+    public void setBody(Robot robot){
+        imageAdapter.mThumbIds[robot.getBody()] = 8;
+        //4 corners
+        imageAdapter.mThumbIds[robot.getBody()-14] = 8; //set the whole body
+        imageAdapter.mThumbIds[robot.getBody()-16] = 8;
+        imageAdapter.mThumbIds[robot.getBody()+14] = 8;
+        imageAdapter.mThumbIds[robot.getBody()+16] = 8;
+
+        //the rest
+        imageAdapter.mThumbIds[robot.getBody()+1] = 8;
+        imageAdapter.mThumbIds[robot.getBody()-1] = 8;
+        imageAdapter.mThumbIds[robot.getBody()+15] = 8;
+        imageAdapter.mThumbIds[robot.getBody()-15] = 8;
+        imageAdapter.notifyDataSetChanged();
+    }
+
+    public void setHead(Robot robot){
+        imageAdapter.mThumbIds[robot.getHead()] = 9;
+        imageAdapter.notifyDataSetChanged();
+    }
+
+    public void setWayPoint(Robot robot, TextView statusTextView) {
+        if (    robot.getWaypointPosition() == robot.getBody()||
+                robot.getWaypointPosition() == robot.getBody()-14 ||
+                robot.getWaypointPosition() == robot.getBody()-16 ||
+                robot.getWaypointPosition() == robot.getBody()+14 ||
+                robot.getWaypointPosition() == robot.getBody()+16 ||
+                robot.getWaypointPosition() == robot.getBody()+1 ||
+                robot.getWaypointPosition() == robot.getBody()-1 ||
+                robot.getWaypointPosition() == robot.getBody()+15 ||
+                robot.getWaypointPosition() == robot.getBody()-15){
+
+            Toast.makeText(callingActivity, "Unable to set waypoint here", Toast.LENGTH_SHORT).show();
+        }
+        else{
+            imageAdapter.mThumbIds[robot.getWaypointPosition()] = 10; //unexplored waypoint
+            statusTextView.setText("Way point: " +Math.abs(robot.getWaypointPosition()/15)+", "+robot.getWaypointPosition()%15);
+
+            imageAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private int turnRightwhenFaceRight(Robot robot){
+        imageAdapter.mThumbIds[robot.getHead()] = 8;
+        robot.setHead(robot.getBody()+15);
+        imageAdapter.mThumbIds[robot.getHead()] = 9;
+        imageAdapter.notifyDataSetChanged();
+        return robot.getHead();
+    }
+    private int turnRightwhenFaceLeft(Robot robot){
+        imageAdapter.mThumbIds[robot.getHead()] = 8;
+        robot.setHead(robot.getBody()-15);
+        imageAdapter.mThumbIds[robot.getHead()] = 9;
+        imageAdapter.notifyDataSetChanged();
+        return robot.getHead();
+    }
+    private int turnRightwhenFaceUp(Robot robot){
+        imageAdapter.mThumbIds[robot.getHead()] = 8;
+        robot.setHead(robot.getBody()+1);
+        imageAdapter.mThumbIds[robot.getHead()] = 9;
+        imageAdapter.notifyDataSetChanged();
+        return robot.getHead();
+    }
+    private int turnRightwhenFaceDown(Robot robot){
+        imageAdapter.mThumbIds[robot.getHead()] = 8;
+        robot.setHead(robot.getBody()-1);
+        imageAdapter.mThumbIds[robot.getHead()] = 9;
+        imageAdapter.notifyDataSetChanged();
+        return robot.getHead();
+    }
+
+
+    private int turnLeftwhenFaceRight(Robot robot){
+        imageAdapter.mThumbIds[robot.getHead()] = 8;
+        robot.setHead(robot.getBody()-15);
+        imageAdapter.mThumbIds[robot.getHead()] = 9;
+        imageAdapter.notifyDataSetChanged();
+        return robot.getHead();
+    }
+    private int turnLeftwhenFaceLeft(Robot robot){
+        imageAdapter.mThumbIds[robot.getHead()] = 8;
+        robot.setHead(robot.getBody()+15);
+        imageAdapter.mThumbIds[robot.getHead()] = 9;
+        imageAdapter.notifyDataSetChanged();
+        return robot.getHead();
+    }
+    private int turnLeftwhenFaceUp(Robot robot){
+        imageAdapter.mThumbIds[robot.getHead()] = 8;
+        robot.setHead(robot.getBody()-1);
+        imageAdapter.mThumbIds[robot.getHead()] = 9;
+        imageAdapter.notifyDataSetChanged();
+        return robot.getHead();
+    }
+    private int turnLeftwhenFaceDown(Robot robot){
+        imageAdapter.mThumbIds[robot.getHead()] = 8;
+        robot.setHead(robot.getBody()+1);
+        imageAdapter.mThumbIds[robot.getHead()] = 9;
+        imageAdapter.notifyDataSetChanged();
+        return robot.getHead();
+    }
+
+    private void moveForwardWhenFaceRight(Robot robot){
+        imageAdapter.mThumbIds[robot.getHead()+1] = 9;
+
+        //4 corners
+        imageAdapter.mThumbIds[(robot.getBody()-14)+1] = 8; //set the whole body
+        imageAdapter.mThumbIds[(robot.getBody()-16)+1] = 8;
+        imageAdapter.mThumbIds[(robot.getBody()+14)+1] = 8;
+        imageAdapter.mThumbIds[(robot.getBody()+16)+1] = 8;
+
+        //the rest
+        imageAdapter.mThumbIds[(robot.getBody())+1] = 8;
+        imageAdapter.mThumbIds[(robot.getBody()-1)+1] = 8;
+        imageAdapter.mThumbIds[(robot.getBody()+15)+1] = 8;
+        imageAdapter.mThumbIds[(robot.getBody()-15)+1] = 8;
+
+        //convert back of robot to explored
+        imageAdapter.mThumbIds[(robot.getBody()-1)] = 1;
+        imageAdapter.mThumbIds[(robot.getBody()-16)] = 1;
+        imageAdapter.mThumbIds[(robot.getBody()+14)] = 1;
+    }
+
+    private void moveForwardWhenFaceLeft(Robot robot){
+        imageAdapter.mThumbIds[robot.getHead()-1] = 9;
+
+        //4 corners
+        imageAdapter.mThumbIds[(robot.getBody()-14)-1] = 8; //set the whole body
+        imageAdapter.mThumbIds[(robot.getBody()-16)-1] = 8;
+        imageAdapter.mThumbIds[(robot.getBody()+14)-1] = 8;
+        imageAdapter.mThumbIds[(robot.getBody()+16)-1] = 8;
+
+        //the rest
+        imageAdapter.mThumbIds[(robot.getBody())-1] = 8;
+        imageAdapter.mThumbIds[(robot.getBody()+1)-1] = 8;
+        imageAdapter.mThumbIds[(robot.getBody()+15)-1] = 8;
+        imageAdapter.mThumbIds[(robot.getBody()-15)-1] = 8;
+
+        //convert back of robot to explored
+        imageAdapter.mThumbIds[(robot.getBody()+1)] = 1;
+        imageAdapter.mThumbIds[(robot.getBody()+16)] = 1;
+        imageAdapter.mThumbIds[(robot.getBody()-14)] = 1;
+    }
+
+    private void moveForwardWhenFaceUp(Robot robot){
+        imageAdapter.mThumbIds[robot.getHead()-15] = 9;
+
+        //4 corners
+        imageAdapter.mThumbIds[(robot.getBody()-14)-15] = 8; //set the whole body
+        imageAdapter.mThumbIds[(robot.getBody()-16)-15] = 8;
+        imageAdapter.mThumbIds[(robot.getBody()+14)-15] = 8;
+        imageAdapter.mThumbIds[(robot.getBody()+16)-15] = 8;
+
+        //the rest
+        imageAdapter.mThumbIds[(robot.getBody())-15] = 8;
+        imageAdapter.mThumbIds[(robot.getBody()-1)-15] = 8;
+        imageAdapter.mThumbIds[(robot.getBody()+15)-15] = 8;
+        imageAdapter.mThumbIds[(robot.getBody()+1)-15] = 8;
+
+        //convert back of robot to explored
+        imageAdapter.mThumbIds[(robot.getBody()+14)] = 1;
+        imageAdapter.mThumbIds[(robot.getBody()+15)] = 1;
+        imageAdapter.mThumbIds[(robot.getBody()+16)] = 1;
+    }
+
+    private void moveForwardWhenFaceDown(Robot robot){
+        imageAdapter.mThumbIds[robot.getHead()+15] = 9;
+
+        //4 corners
+        imageAdapter.mThumbIds[(robot.getBody()-14)+15] = 8; //set the whole body
+        imageAdapter.mThumbIds[(robot.getBody()-16)+15] = 8;
+        imageAdapter.mThumbIds[(robot.getBody()+14)+15] = 8;
+        imageAdapter.mThumbIds[(robot.getBody()+16)+15] = 8;
+
+        //the rest
+        imageAdapter.mThumbIds[(robot.getBody())+15] = 8;
+        imageAdapter.mThumbIds[(robot.getBody()-1)+15] = 8;
+        imageAdapter.mThumbIds[(robot.getBody()+1)+15] = 8;
+        imageAdapter.mThumbIds[(robot.getBody()-15)+15] = 8;
+
+        //convert back of robot to explored
+        imageAdapter.mThumbIds[(robot.getBody()-14)] = 1;
+        imageAdapter.mThumbIds[(robot.getBody()-15)] = 1;
+        imageAdapter.mThumbIds[(robot.getBody()-16)] = 1;
+    }
+
+
+    public void turnLeft(Robot robot){
+        if(robot.getHead() == robot.getBody()+1){ //face right
+            robot.setHead(turnLeftwhenFaceRight(robot));
+        }
+        else if(robot.getHead() == robot.getBody()-1) { //face left
+            robot.setHead(turnLeftwhenFaceLeft(robot));
+        }
+        else if(robot.getHead() == robot.getBody()-15) { //face up
+            robot.setHead(turnLeftwhenFaceUp(robot));
         }
         else{ //face down
-            head = turnLeftwhenFaceDown(head, body);
+            robot.setHead(turnLeftwhenFaceDown(robot));
         }
+        checkIfWaypointIsExplored(robot);
+        imageAdapter.notifyDataSetChanged();
     }
 
-    public void moveForward(int head, int body){
 
-    }
-
-    public void turnRight(int head, int body){
-        if(head == body+1){ //face right
-            head = turnRightwhenFaceRight(head, body);
-            MainActivity.sendMessage("tr");
+    public void turnRight(Robot robot){
+        if(robot.getHead() == robot.getBody()+1){ //face right
+            robot.setHead(turnRightwhenFaceRight(robot));
         }
-        else if(head == body-1) { //face left
-            head = turnRightwhenFaceLeft(head, body);
+        else if(robot.getHead() == robot.getBody()-1) { //face left
+            robot.setHead(turnRightwhenFaceLeft(robot));
 
         }
-        else if(head == body-15) { //face up
+        else if(robot.getHead() == robot.getBody()-15) { //face up
 
-            head = turnRightwhenFaceUp(head, body);
+            robot.setHead(turnRightwhenFaceUp(robot));
 
         }
         else{ //face down
-            head = turnRightwhenFaceDown(head, body);
+            robot.setHead(turnRightwhenFaceDown(robot));
+        }
+        checkIfWaypointIsExplored(robot);
+        imageAdapter.notifyDataSetChanged();
+    }
+
+    public void moveForward(Robot robot){
+        if((robot.getHead()%15>=1 && robot.getHead()%15<=13) && (Math.abs(robot.getHead()/15) >=1 && Math.abs(robot.getHead()/15) <=18)){
+            if(robot.getHead() == robot.getBody()+1){ //face right
+                moveForwardWhenFaceRight(robot);
+                //increase current of head and body by 1 grid forward
+                robot.setHead(robot.getHead()+1);
+                robot.setBody(robot.getBody()+1);
+            }
+            else if(robot.getHead() == robot.getBody()-1){ //face left
+                moveForwardWhenFaceLeft(robot);
+                //increase current of head and body by 1 grid forward
+                robot.setHead(robot.getHead()-1);
+                robot.setBody(robot.getBody()-1);
+            }
+            else if(robot.getHead() == robot.getBody()-15){ //face up
+                moveForwardWhenFaceUp(robot);
+                //increase current of head and body by 1 grid forward
+                robot.setHead(robot.getHead()-15);
+                robot.setBody(robot.getBody()-15);
+            }
+            else{ //face down
+                moveForwardWhenFaceDown(robot);
+                //increase current of head and body by 1 grid forward
+                robot.setHead(robot.getHead()+15);
+                robot.setBody(robot.getBody()+15);
+            }
+            checkIfWaypointIsExplored(robot);
+            imageAdapter.notifyDataSetChanged();
+        }
+        else{
+            Toast.makeText(callingActivity, "Out of bound!", Toast.LENGTH_SHORT).show();
         }
     }
 

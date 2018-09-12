@@ -30,13 +30,14 @@ import shadowbotz.shadowbotz.BluetoothObserverSubject.Subject;
 import shadowbotz.shadowbotz.Config;
 import shadowbotz.shadowbotz.Controller.ImageAdapter;
 import shadowbotz.shadowbotz.Controller.MovementController;
+import shadowbotz.shadowbotz.Model.Robot;
 import shadowbotz.shadowbotz.R;
 
 public class RobotFragment extends Fragment implements Observer {
 
 
-    private int count = 2;
-    private int head, body;
+    private Robot robot = new Robot();
+
     // Observer pattern
     private Subject topic;
     private MovementController movementController;
@@ -67,7 +68,7 @@ public class RobotFragment extends Fragment implements Observer {
 
         final ImageAdapter imageAdapter = new ImageAdapter(fragmentBelongActivity);
 
-        movementController = new MovementController(imageAdapter);
+        movementController = new MovementController(imageAdapter, getActivity());
 
         //for onCreateOptionsMenu
         setHasOptionsMenu(true);
@@ -79,20 +80,20 @@ public class RobotFragment extends Fragment implements Observer {
             public void onItemClick(AdapterView<?> parent, View v,
                                     int position, long id) {
                 if((position%15>=1 && position%15<=13) && (Math.abs(position/15) >=1 && Math.abs(position/15) <=18)){
-                    if(count == 2){
-                        body = position;
-                        movementController.setBody(body); //set the starting position of the robot
-                        count --;
+                    if(!robot.isBodyPosition()){
+                        robot.setBody(position);
+                        movementController.setBody(robot); //set the starting position of the robot
+                        robot.setBodyPosition(true);
                     }
-                    else if(count == 1){
-                        head=position;
-                        if(head == body+1 || head == body-1 ||head == body+15 ||head == body-15 ){  //make sure head is at the correct position
-                            movementController.setHead(head);
-                            count --;
-                        }
-                        else{
-                            Toast.makeText(fragmentBelongActivity, "Invalid head position", Toast.LENGTH_SHORT).show();
-                        }
+                    else if(!robot.isHeadPosition()){
+                        robot.setHead(position);
+                            if(robot.getHead() == robot.getBody()+1 || robot.getHead() == robot.getBody()-1 || robot.getHead() == robot.getBody()+15 || robot.getHead() == robot.getBody()-15 ){  //make sure head is at the correct position
+                                movementController.setHead(robot);
+                                robot.setHeadPosition(true);
+                            }
+                            else{
+                                Toast.makeText(fragmentBelongActivity, "Invalid head position", Toast.LENGTH_SHORT).show();
+                            }
                     }
                     else{
                         Toast.makeText(fragmentBelongActivity, "Robot Position Set!", Toast.LENGTH_SHORT).show();
@@ -107,9 +108,13 @@ public class RobotFragment extends Fragment implements Observer {
         gridview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() { //set way point
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                if (count==0){
-                    Toast.makeText(fragmentBelongActivity,  Math.abs(i/15)+", "+i%15, Toast.LENGTH_SHORT).show();
-                    statusTextView.setText("Way point: " +Math.abs(i/15)+", "+i%15);
+                if (robot.isHeadPosition()&& robot.isBodyPosition() && !robot.isWaypoint()){
+                    robot.setWaypointPosition(i);
+                    movementController.setWayPoint(robot, statusTextView);
+                    robot.setWaypoint(true);
+                }
+                else if(robot.isHeadPosition()&& robot.isBodyPosition() && robot.isWaypoint()){
+                    Toast.makeText(fragmentBelongActivity, "Waypoint has been set.", Toast.LENGTH_SHORT).show();
                 }
                 else{
                     Toast.makeText(fragmentBelongActivity, "Please set initial position of robot first!", Toast.LENGTH_SHORT).show();
@@ -123,27 +128,30 @@ public class RobotFragment extends Fragment implements Observer {
         directionView.setOnButtonListener(new InputView.InputEventListener() {
             @Override public void onInputEvent(View view, int buttons) {
 
-                if(count == 0){
+                if(robot.isWaypoint() && robot.isBodyPosition() && robot.isHeadPosition()){
                     switch (buttons&0xff) {
                         case DirectionView.DIRECTION_DOWN:
                             Toast.makeText(fragmentBelongActivity, "Not in use!", Toast.LENGTH_SHORT).show();
                             break;
                         case DirectionView.DIRECTION_RIGHT:
-                            movementController.turnRight(head, body);
+                            movementController.turnRight(robot);
+                            MainActivity.sendMessage("tr");
                             break;
 
                         case DirectionView.DIRECTION_LEFT:
-                            movementController.turnLeft(head, body);
+                            movementController.turnLeft(robot);
+                            MainActivity.sendMessage("tl");
                             break;
                         case DirectionView.DIRECTION_UP: //move forward
-
+                            movementController.moveForward(robot);
+                            MainActivity.sendMessage("f");
                             break;
                     }
-                    imageAdapter.notifyDataSetChanged();
+
 
                 }
                 else{
-                    Toast.makeText(fragmentBelongActivity, "Robot position not set!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(fragmentBelongActivity, "WayPoint not set!", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -261,13 +269,14 @@ public class RobotFragment extends Fragment implements Observer {
                 switch (msg.getString("status")) {
                     case "moving right":
                         Log.e("RobotFragmentMovement", "moving right");
-                        movementController.turnRight(head, body);
+                        movementController.turnRight(robot);
                         break;
                     case "moving left":
                         Log.e("RobotFragmentMovement", "moving left");
-                        movementController.turnLeft(head, body);
+                        movementController.turnLeft(robot);
                         break;
                     case "moving forward":
+                        movementController.moveForward(robot);
                         break;
                 }
             }
