@@ -30,8 +30,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import io.realm.Realm;
-import io.realm.RealmQuery;
-import io.realm.RealmResults;
 import shadowbotz.shadowbotz.BluetoothObserverSubject.BluetoothSubject;
 import shadowbotz.shadowbotz.Config;
 import shadowbotz.shadowbotz.Controller.BluetoothController;
@@ -64,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         sharedPreferences = getSharedPreferences(Config.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        // persistentController.f1Andf2Button(BluetoothActivity.this, Config.F1_BUTTON, "testing");
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -222,6 +219,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (id == R.id.secure_connect_scan) {
             // Launch the DeviceListActivity to see devices and do scan
+            bluetoothMessagingService.stop();
             Intent serverIntent = new Intent(this, DeviceListActivity.class);
             startActivityForResult(serverIntent, Config.REQUEST_CONNECT_DEVICE_SECURE);
             return true;
