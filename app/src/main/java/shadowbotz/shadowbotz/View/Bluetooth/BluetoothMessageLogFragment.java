@@ -122,9 +122,15 @@ public class BluetoothMessageLogFragment extends Fragment implements Observer {
         RealmQuery<BluetoothMessage> query = realm.where(BluetoothMessage.class);
         RealmResults<BluetoothMessage> result = query.findAll();
 
-        bluetoothMessageArrayList.addAll(result);
+        if(result.size() > 10) {
+            bluetoothMessageArrayList.addAll(result.subList(result.size()-10, result.size()-1));
+        }
+        else {
+            bluetoothMessageArrayList.addAll(result);
+        }
 
         bluetoothMessageAdapter.update(bluetoothMessageArrayList);
+        recyclerChatList.scrollToPosition(bluetoothMessageArrayList.size() - 1);
     }
 
     @Override
