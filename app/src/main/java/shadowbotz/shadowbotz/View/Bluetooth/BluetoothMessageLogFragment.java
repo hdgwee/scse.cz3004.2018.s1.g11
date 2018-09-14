@@ -19,21 +19,30 @@ package shadowbotz.shadowbotz.View.Bluetooth;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
+import io.realm.Realm;
+import io.realm.RealmQuery;
+import io.realm.RealmResults;
+import io.realm.Sort;
+import shadowbotz.shadowbotz.Adapter.BluetoothMessageAdapter;
+import shadowbotz.shadowbotz.Adapter.ListViewListener;
 import shadowbotz.shadowbotz.BluetoothObserverSubject.Observer;
 import shadowbotz.shadowbotz.BluetoothObserverSubject.Subject;
 import shadowbotz.shadowbotz.Config;
+import shadowbotz.shadowbotz.Model.BluetoothMessage;
 import shadowbotz.shadowbotz.R;
 import shadowbotz.shadowbotz.View.MainActivity;
 
@@ -42,13 +51,16 @@ import shadowbotz.shadowbotz.View.MainActivity;
  */
 public class BluetoothMessageLogFragment extends Fragment implements Observer {
 
-    // Layout Views
-    private ListView listViewForMessage;
     private EditText editTextOutgoingMessage;
     private Button buttonSend;
+    private RecyclerView recyclerChatList;
 
-    // Array adapter for the conversation thread
-    private ArrayAdapter<String> mConversationArrayAdapter;
+    private BluetoothMessageAdapter bluetoothMessageAdapter;
+    private ArrayList<BluetoothMessage> bluetoothMessageArrayList = new ArrayList<>();
+    private ListViewListener listViewListener = new ListViewListener() {
+        @Override
+        public void onSelected(int position) {}
+    };
 
     // Observer pattern
     private Subject topic;
@@ -62,14 +74,14 @@ public class BluetoothMessageLogFragment extends Fragment implements Observer {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_bluetooth_message, container, false);
+        return inflater.inflate(R.layout.fragment_bluetooth_message_log, container, false);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        listViewForMessage = view.findViewById(R.id.listViewForMessage);
         editTextOutgoingMessage = view.findViewById(R.id.editTextOutgoingMessage);
         buttonSend = view.findViewById(R.id.buttonSend);
+        recyclerChatList = view.findViewById(R.id.recyclerChatList);
 
         initializeUserInterface();
 
@@ -80,10 +92,6 @@ public class BluetoothMessageLogFragment extends Fragment implements Observer {
 
     // Set up the UI and background operations for chat
     private void initializeUserInterface() {
-        // Initialize the array adapter for the conversation thread
-        mConversationArrayAdapter = new ArrayAdapter<>(getActivity(), R.layout.message);
-
-        listViewForMessage.setAdapter(mConversationArrayAdapter);
 
         // Initialize the compose field with a listener for the return key
         editTextOutgoingMessage.setOnEditorActionListener(mWriteListener);
@@ -97,9 +105,40 @@ public class BluetoothMessageLogFragment extends Fragment implements Observer {
                     TextView textView = view.findViewById(R.id.editTextOutgoingMessage);
                     String message = textView.getText().toString();
                     sendMessage(message);
+                    editTextOutgoingMessage.setText("");
                 }
             }
         });
+
+        bluetoothMessageAdapter = new BluetoothMessageAdapter(getContext(), bluetoothMessageArrayList, listViewListener);
+        recyclerChatList.setAdapter(bluetoothMessageAdapter);
+        bluetoothMessageAdapter.setCurrentDeviceAddress(Config.my_bluetooth_device_address);
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+        recyclerChatList.setLayoutManager(linearLayoutManager);
+
+        Realm realm = Realm.getDefaultInstance();
+
+        RealmQuery<BluetoothMessage> query = realm.where(BluetoothMessage.class);
+        RealmResults<BluetoothMessage> result = query.findAll();
+
+        bluetoothMessageArrayList.addAll(result);
+
+        bluetoothMessageAdapter.update(bluetoothMessageArrayList);
+    }
+
+    @Override
+    public void onResume() {
+        MainActivity.bluetoothSubject.register(this);
+
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        MainActivity.bluetoothSubject.unregister(this);
+
+        super.onPause();
     }
 
     // Action listener for the EditText widget to listen for the return key
@@ -128,10 +167,12 @@ public class BluetoothMessageLogFragment extends Fragment implements Observer {
 
     @Override
     public void update() {
-        String msg = (String) topic.getUpdate(this);
+        BluetoothMessage bluetoothMessage = (BluetoothMessage) topic.getUpdate(this);
 
-        if (msg != null) {
-            mConversationArrayAdapter.add(msg);
+        if (bluetoothMessage != null) {
+            bluetoothMessageArrayList.add(bluetoothMessage);
+            bluetoothMessageAdapter.update(bluetoothMessageArrayList);
+            recyclerChatList.scrollToPosition(bluetoothMessageArrayList.size() - 1);
         } else {
             // No new message
         }

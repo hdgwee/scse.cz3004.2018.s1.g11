@@ -19,14 +19,19 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import java.util.Calendar;
 import java.util.Set;
+import java.util.UUID;
 
 import io.realm.Realm;
+import io.realm.RealmQuery;
+import io.realm.RealmResults;
 import shadowbotz.shadowbotz.BluetoothObserverSubject.BluetoothSubject;
 import shadowbotz.shadowbotz.Config;
 import shadowbotz.shadowbotz.Controller.BluetoothController;
@@ -37,6 +42,7 @@ import shadowbotz.shadowbotz.Service.BluetoothMessagingService;
 import shadowbotz.shadowbotz.View.Bluetooth.BluetoothActivity;
 import shadowbotz.shadowbotz.View.Bluetooth.DeviceListActivity;
 
+@SuppressLint("HardwareIds")
 public class MainActivity extends AppCompatActivity {
 
     public static BluetoothSubject bluetoothSubject = new BluetoothSubject();
@@ -44,18 +50,16 @@ public class MainActivity extends AppCompatActivity {
     public SharedPreferences sharedPreferences;
     // PersistentController persistentController = new PersistentController();
 
-    private Realm realm;
     private static BluetoothMessagingService bluetoothMessagingService = null;
     private BluetoothAdapter bluetoothAdapter;
     private Set<BluetoothDevice> pairedDevices;
-    private BluetoothDevice device;
+    private ActionBar actionBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Realm.init(getApplicationContext());
-        realm = Realm.getDefaultInstance();
+        Realm.init(this);
 
         setContentView(R.layout.activity_main);
 
@@ -71,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        actionBar = getSupportActionBar();
         requestForAccessFineLocationPermission();
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -84,6 +89,9 @@ public class MainActivity extends AppCompatActivity {
 
         if (bluetoothAdapter != null) {
             pairedDevices = bluetoothAdapter.getBondedDevices();
+
+            Config.my_bluetooth_device_name = bluetoothAdapter.getName();
+            Config.my_bluetooth_device_address = bluetoothAdapter.getAddress();
         }
 
         bluetoothMessagingService = new BluetoothMessagingService(null, mHandler);
@@ -95,6 +103,8 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case Config.REQUEST_CONNECT_DEVICE_SECURE:
                 // When DeviceListActivity returns with a device to connect
+                BluetoothDevice device;
+
                 if (resultCode == Activity.RESULT_OK) {
                     String address = "";
 
@@ -107,12 +117,13 @@ public class MainActivity extends AppCompatActivity {
                     for (BluetoothDevice bt : pairedDevices) {
                         if (bt.getAddress().equals(device.getAddress())) {
                             Config.paired_device_name = device.getName();
+                            Config.paired_device_address = device.getAddress();
                             break;
                         }
                     }
 
                     if(Config.paired_device_name.length() == 0) {
-                        Config.paired_device_name = device.getAddress();
+                        Config.paired_device_name = Config.paired_device_address;
                     }
 
                     bluetoothMessagingService.connect(device, true);
@@ -132,12 +143,13 @@ public class MainActivity extends AppCompatActivity {
                     for (BluetoothDevice bt : pairedDevices) {
                         if (bt.getAddress().equals(device.getAddress())) {
                             Config.paired_device_name = device.getName();
+                            Config.paired_device_address = device.getAddress();
                             break;
                         }
                     }
 
                     if(Config.paired_device_name.length() == 0) {
-                        Config.paired_device_name = device.getAddress();
+                        Config.paired_device_name = Config.paired_device_address;
                     }
 
                     bluetoothMessagingService.connect(device, true);
@@ -189,6 +201,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
+
+        if (actionBar != null) {
+            actionBar.setTitle("shadowbotz - " + Config.current_bluetooth_state);
+        }
+
         super.onResume();
     }
 
@@ -233,18 +250,24 @@ public class MainActivity extends AppCompatActivity {
             if (msg.what == Config.MESSAGE_STATE_CHANGE) {
                 if (msg.arg1 == BluetoothMessagingService.STATE_CONNECTED) {
                     Config.current_bluetooth_state = getString(R.string.title_bluetooth_connected_to, Config.paired_device_name);
+
+                    Log.e("BtMsgSvrState", "Connected");
                 }
                 else if (msg.arg1 == BluetoothMessagingService.STATE_CONNECTING) {
                     Config.current_bluetooth_state = getString(R.string.title_bluetooth_connecting);
+
+                    Log.e("BtMsgSvrState", "Connecting");
                 }
                 else if (msg.arg1 == BluetoothMessagingService.STATE_LISTEN) {
                     Config.current_bluetooth_state = getString(R.string.title_bluetooth_listening);
+
+                    Log.e("BtMsgSvrState", "Listening");
                 }
                 else if (msg.arg1 == BluetoothMessagingService.STATE_NONE) {
                     Config.current_bluetooth_state = getString(R.string.title_bluetooth_disconnected);
-                }
 
-                ActionBar actionBar = getSupportActionBar();
+                    Log.e("BtMsgSvrState", "Disconnected");
+                }
 
                 if (actionBar != null) {
                     actionBar.setTitle("shadowbotz - " + Config.current_bluetooth_state);
@@ -256,34 +279,38 @@ public class MainActivity extends AppCompatActivity {
                 String writeMessage = new String(writeBuf);
 
                 // Save message in realm
+                Realm realm = Realm.getDefaultInstance();
                 realm.beginTransaction();
-                BluetoothMessage bluetoothMessage = new BluetoothMessage();
-                bluetoothMessage.setDeviceName(Config.paired_device_name);
-                bluetoothMessage.setDeviceAddress("");
+                BluetoothMessage bluetoothMessage = realm.createObject(BluetoothMessage.class
+                        , UUID.randomUUID().toString());
+                bluetoothMessage.setDeviceName(Config.my_bluetooth_device_name);
+                bluetoothMessage.setDeviceAddress(Config.my_bluetooth_device_address);
                 bluetoothMessage.setMessage(writeMessage);
-                bluetoothMessage.setDatetime(System.currentTimeMillis() / 1000L);
+                bluetoothMessage.setDatetime(Calendar.getInstance().getTime());
                 realm.commitTransaction();
 
                 Config.sent_message = writeMessage;
 
-                MainActivity.bluetoothSubject.postMessage(writeMessage, "RECEIVED");
+                MainActivity.bluetoothSubject.postMessage(bluetoothMessage);
             } else if (msg.what == Config.MESSAGE_READ) {
                 // Receive a message to connected bluetooth device
                 byte[] readBuf = (byte[]) msg.obj;
                 String readMessage = new String(readBuf, 0, msg.arg1);
 
                 // Save message in realm
+                Realm realm = Realm.getDefaultInstance();
                 realm.beginTransaction();
-                BluetoothMessage bluetoothMessage = new BluetoothMessage();
-                bluetoothMessage.setDeviceName("");
-                bluetoothMessage.setDeviceAddress("");
+                BluetoothMessage bluetoothMessage = realm.createObject(BluetoothMessage.class
+                        , UUID.randomUUID().toString());
+                bluetoothMessage.setDeviceName(Config.paired_device_name);
+                bluetoothMessage.setDeviceAddress(Config.paired_device_address);
                 bluetoothMessage.setMessage(readMessage);
-                bluetoothMessage.setDatetime(System.currentTimeMillis() / 1000L);
+                bluetoothMessage.setDatetime(Calendar.getInstance().getTime());
                 realm.commitTransaction();
 
                 Config.received_message = readMessage;
 
-                MainActivity.bluetoothSubject.postMessage(readMessage, "SENT");
+                MainActivity.bluetoothSubject.postMessage(bluetoothMessage);
             } else if (msg.what == Config.MESSAGE_DEVICE_NAME) {
                 // msg.getData().getString(Config.DEVICE_NAME)
             } else if (msg.what == Config.MESSAGE_TOAST) {

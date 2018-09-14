@@ -74,7 +74,7 @@ public class MovementController {
         }
         else{
             imageAdapter.mThumbIds[robot.getWaypointPosition()] = 10; //unexplored waypoint
-            statusTextView.setText("Way point: " +Math.abs(robot.getWaypointPosition()/15)+", "+robot.getWaypointPosition()%15);
+            statusTextView.setText("Way point: "+robot.getWaypointPosition()%15+", "+Math.abs(robot.getWaypointPosition()/15));
 
             imageAdapter.notifyDataSetChanged();
         }
@@ -238,6 +238,7 @@ public class MovementController {
             robot.setHead(turnLeftwhenFaceDown(robot));
         }
         checkIfWaypointIsExplored(robot);
+        MainActivity.sendMessage("tl");
         imageAdapter.notifyDataSetChanged();
     }
 
@@ -259,6 +260,7 @@ public class MovementController {
             robot.setHead(turnRightwhenFaceDown(robot));
         }
         checkIfWaypointIsExplored(robot);
+        MainActivity.sendMessage("tr");
         imageAdapter.notifyDataSetChanged();
     }
 
@@ -289,6 +291,7 @@ public class MovementController {
                 robot.setBody(robot.getBody()+15);
             }
             checkIfWaypointIsExplored(robot);
+            MainActivity.sendMessage("f");
             imageAdapter.notifyDataSetChanged();
         }
         else{

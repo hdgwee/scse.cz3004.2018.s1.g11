@@ -1,22 +1,25 @@
 package shadowbotz.shadowbotz.Model;
 
+import java.util.Calendar;
+import java.util.Date;
+
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
 public class BluetoothMessage extends RealmObject {
 
     @PrimaryKey
-    private long id;
-    private String deviceAddress;
-    private String deviceName;
-    private String message;
-    private long datetime;
+    private String id;
+    private String deviceAddress = "";
+    private String deviceName = "";
+    private String message = "";
+    private Date datetime = Calendar.getInstance().getTime();
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -44,11 +47,11 @@ public class BluetoothMessage extends RealmObject {
         this.message = message;
     }
 
-    public long getDatetime() {
+    public Date getDatetime() {
         return datetime;
     }
 
-    public void setDatetime(long datetime) {
+    public void setDatetime(Date datetime) {
         this.datetime = datetime;
     }
 }

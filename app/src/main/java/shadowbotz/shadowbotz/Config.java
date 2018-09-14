@@ -29,7 +29,11 @@ public class Config {
 
     public static String current_bluetooth_state = "";
     public static String paired_device_name = "";
+    public static String paired_device_address = "";
 
     public static String received_message = "";
     public static String sent_message = "";
+
+    public static String my_bluetooth_device_name = "";
+    public static String my_bluetooth_device_address = "";
 }

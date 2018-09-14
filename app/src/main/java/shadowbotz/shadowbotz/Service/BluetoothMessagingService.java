@@ -176,6 +176,7 @@ public class BluetoothMessagingService {
         Log.d(TAG, "connected, Socket Type:" + socketType);
 
         Config.paired_device_name = device.getName();
+        Config.paired_device_address = device.getAddress();
 
         // Cancel the thread that completed the connection
         if (mConnectThread != null) {

@@ -3,10 +3,12 @@ package shadowbotz.shadowbotz.BluetoothObserverSubject;
 import java.util.ArrayList;
 import java.util.List;
 
+import shadowbotz.shadowbotz.Model.BluetoothMessage;
+
 public class BluetoothSubject implements Subject {
 
     private List<Observer> observers;
-    private String message;
+    private BluetoothMessage bluetoothMessage;
     private boolean changed;
     private final Object MUTEX= new Object();
 
@@ -37,7 +39,7 @@ public class BluetoothSubject implements Subject {
             if (!changed)
                 return;
             observersLocal = new ArrayList<>(this.observers);
-            this.changed=false;
+            this.changed = false;
         }
         for (Observer obj : observersLocal) {
             obj.update();
@@ -47,13 +49,13 @@ public class BluetoothSubject implements Subject {
 
     @Override
     public Object getUpdate(Observer obj) {
-        return this.message;
+        return this.bluetoothMessage;
     }
 
     // Method to post message to the topic
-    public void postMessage(String msg, String type){
-        this.message=msg;
-        this.changed=true;
+    public void postMessage(BluetoothMessage bluetoothMessage){
+        this.bluetoothMessage = bluetoothMessage;
+        this.changed = true;
         notifyObservers();
     }
 

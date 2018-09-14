@@ -23,10 +23,18 @@
                 android:gravity="center"
                 android:layout_above="@id/statusTextView">
 
-                <GridView
+                <!--<GridView
                     android:id="@+id/gridview"
                     android:layout_width="330dp"
                     android:layout_height="440dp"
+                    android:paddingTop="32dp"
+                    android:numColumns="15"
+                    android:scrollbars="none" />-->
+
+                <GridView
+                    android:id="@+id/gridview"
+                    android:layout_width="270dp"
+                    android:layout_height="360dp"
                     android:paddingTop="32dp"
                     android:numColumns="15"
                     android:scrollbars="none" />
