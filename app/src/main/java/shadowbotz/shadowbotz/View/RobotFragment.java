@@ -107,8 +107,17 @@ public class RobotFragment extends Fragment implements Observer {
         DescriptorStringController descriptorStringController = new DescriptorStringController(imageAdapter);
 
         //testing descriptorstring 1
-        descriptorStringController.descriptorString1("FFC07F80FF01FE03FFFFFFF3FFE7FFCFFF9C7F38FE71FCE3F87FF0FFE1FFC3FF87FF0E0E1C1F");
 //        descriptorStringController.descriptorString1("7000000000000000000000000000000000000000000000000000000000000000000000000000");
+        descriptorStringController.descriptorString1("FFC07F80FF01FE03FFFFFFF3FFE7FFCFFF9C7F38FE71FCE3F87FF0FFE1FFC3FF87FF0E0E1C1F");
+
+        //testing descriptorString 2
+        descriptorStringController.descriptorString2("00000100001C80000000001C0000080000060001C00000080000");
+        descriptorStringController.descriptorString2("00000100001C80000000001C0000080000060001C00000080000");
+
+        //testing setting of arrows
+        descriptorStringController.splitImageString("(6, 5, D),(3, 9, R),(1, 15, D),(7, 19, L),(14, 14, U)");
+
+        //End of testing
 
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() { //set robot body and head
             public void onItemClick(AdapterView<?> parent, View v,
