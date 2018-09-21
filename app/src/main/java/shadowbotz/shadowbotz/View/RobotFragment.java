@@ -15,6 +15,8 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.GridView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,7 +47,15 @@ public class RobotFragment extends Fragment implements Observer {
     private TextView statusTextView;
     private ImageAdapter imageAdapter;
 
+    private Button setWaypoint;
+    private Button setRobot;
+    private Button sendCoords;
+
     private boolean autoUpdate=true;
+    private boolean canSetWayPoint = false;
+    private boolean canSetRobot = false;
+    private boolean canSendCoords = false;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -66,6 +76,18 @@ public class RobotFragment extends Fragment implements Observer {
         final Button buttonStart = view.findViewById(R.id.buttonStart);
         final Button buttonStop = view.findViewById(R.id.buttonStop);
 
+        final TextView textviewRobotBody = view.findViewById(R.id.textview_robot_body);
+        final TextView textviewRobotHead = view.findViewById(R.id.textview_robot_head);
+        final TextView textviewWaypoint = view.findViewById(R.id.textview_waypoint);
+
+        final RelativeLayout leftColumn = view.findViewById(R.id.leftColumn);
+        final LinearLayout rightColumn = view.findViewById(R.id.rightColumn);
+
+        setWaypoint = view.findViewById(R.id.button_way_point);
+        setRobot = view.findViewById(R.id.button_robot_position);
+        sendCoords = view.findViewById(R.id.button_send_coords);
+        sendCoords.setEnabled(false);
+
         statusTextView = view.findViewById(R.id.statusTextView);
 
         Button buttonL1 = view.findViewById(R.id.buttonL1);
@@ -84,57 +106,135 @@ public class RobotFragment extends Fragment implements Observer {
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() { //set robot body and head
             public void onItemClick(AdapterView<?> parent, View v,
                                     int position, long id) {
-                if((position%15>=1 && position%15<=13) && Math.abs(19-(Math.abs(position/15))) >=1 && Math.abs(19-(Math.abs(position/15))) <=18){
-                    if(!robot.isBodyPosition()){
-                        robot.setBody(position);
-                        movementController.setBody(robot); //set the starting position of the robot
-                        robot.setBodyPosition(true);
-                        MainActivity.sendMessage("Way point: " +robot.getBody()%15 +", "+ Math.abs(19-(Math.abs(position/15))));
 
-                    }
-                    else if(!robot.isHeadPosition()){
-                        robot.setHead(position);
-                        if(robot.getHead() == robot.getBody()+1 || robot.getHead() == robot.getBody()-1 || robot.getHead() == robot.getBody()+15 || robot.getHead() == robot.getBody()-15 ){  //make sure head is at the correct position
-                            movementController.setHead(robot);
-                            robot.setHeadPosition(true);
-                            MainActivity.sendMessage("Way point: " +robot.getHead()%15 +", "+ Math.abs(19-(Math.abs(position/15))));
+                if(canSetRobot){
+                    if((position%15>=1 && position%15<=13) && Math.abs(19-(Math.abs(position/15))) >=1 && Math.abs(19-(Math.abs(position/15))) <=18){
+                        if(!robot.isBodyPosition()){
+                            robot.setBody(position);
+                            movementController.setBody(robot); //set the starting position of the robot
+                            robot.setBodyPosition(true);
+                            // MainActivity.sendMessage("Way point: " +robot.getBody()%15 +", "+ Math.abs(19-(Math.abs(position/15))));
 
+                            String output = robot.getBody()%15 +", "+ Math.abs(19-(Math.abs(position/15)));
+                            textviewRobotBody.setText(output);
+                        }
+                        else if(!robot.isHeadPosition()){
+                            robot.setHead(position);
+                            if(robot.getHead() == robot.getBody()+1 || robot.getHead() == robot.getBody()-1 || robot.getHead() == robot.getBody()+15 || robot.getHead() == robot.getBody()-15 ){  //make sure head is at the correct position
+                                movementController.setHead(robot);
+                                robot.setHeadPosition(true);
+                                // MainActivity.sendMessage("Way point: " +robot.getHead()%15 +", "+ Math.abs(19-(Math.abs(position/15))));
+
+                                canSetRobot = false;
+                                setWaypoint.setEnabled(true);
+                                sendCoords.setEnabled(true);
+
+                                leftColumn.setVisibility(View.VISIBLE);
+                                rightColumn.setVisibility(View.VISIBLE);
+
+                                String output = robot.getHead()%15 +", "+ Math.abs(19-(Math.abs(position/15)));
+                                textviewRobotHead.setText(output);
+                            }
+                            else{
+                                Toast.makeText(fragmentBelongActivity, "Invalid head position", Toast.LENGTH_SHORT).show();
+                            }
                         }
                         else{
-                            Toast.makeText(fragmentBelongActivity, "Invalid head position", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(fragmentBelongActivity, "Robot Position Set!", Toast.LENGTH_SHORT).show();
                         }
+                        imageAdapter.notifyDataSetChanged();
+
                     }
                     else{
-                        Toast.makeText(fragmentBelongActivity, "Robot Position Set!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(fragmentBelongActivity, "Out of Range!", Toast.LENGTH_SHORT).show();
                     }
-                    imageAdapter.notifyDataSetChanged();
                 }
                 else{
-                    Toast.makeText(fragmentBelongActivity, "Out of Range!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(fragmentBelongActivity, "Please press set robot button", Toast.LENGTH_SHORT).show();
                 }
+
             }
         });
         gridview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() { //set way point
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                if (robot.isHeadPosition()&& robot.isBodyPosition() && !robot.isWaypoint()){
+                if (canSetWayPoint){
                     robot.setWaypointPosition(i);
                     movementController.setWayPoint(robot, statusTextView);
                     robot.setWaypoint(true);
-                    MainActivity.sendMessage("Way point: "+ robot.getWaypointPosition()%15  +", "+Math.abs(19-(Math.abs(robot.getWaypointPosition()/15))));
+                    // MainActivity.sendMessage("Way point: "+ robot.getWaypointPosition()%15  +", "+Math.abs(19-(Math.abs(robot.getWaypointPosition()/15))));
+                    canSetWayPoint = false;
+                    setRobot.setEnabled(true);
 
-                }
-                else if(robot.isHeadPosition()&& robot.isBodyPosition() && robot.isWaypoint()){
-                    Toast.makeText(fragmentBelongActivity, "Waypoint has been set.", Toast.LENGTH_SHORT).show();
+                    leftColumn.setVisibility(View.VISIBLE);
+                    rightColumn.setVisibility(View.VISIBLE);
+
+                    String output = robot.getWaypointPosition()%15  +", "+Math.abs(19-(Math.abs(robot.getWaypointPosition()/15)));
+                    textviewWaypoint.setText(output);
                 }
                 else{
-                    Toast.makeText(fragmentBelongActivity, "Please set initial position of robot first!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(fragmentBelongActivity, "Please press set waypoint button", Toast.LENGTH_SHORT).show();
                 }
                 return true;
             }
         });
 
+        setWaypoint.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(robot.isWaypoint()){
+                    movementController.clearWayPoint(robot);
+                }
+                canSetWayPoint = true;
+                robot.setWaypoint(false);
+                setRobot.setEnabled(false);
+                leftColumn.setVisibility(View.INVISIBLE);
+                rightColumn.setVisibility(View.INVISIBLE);
+            }
+        });
 
+        setRobot.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (robot.isBodyPosition()){
+                    movementController.clearRobot(robot);
+                }
+                canSetRobot = true;
+                robot.setHeadPosition(false);
+                robot.setBodyPosition(false);
+                setWaypoint.setEnabled(false);
+                leftColumn.setVisibility(View.INVISIBLE);
+                rightColumn.setVisibility(View.INVISIBLE);
+            }
+        });
+
+        sendCoords.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                JSONObject data = new JSONObject();
+
+                try {
+                    data.put("robot_head_x", robot.getHead()%15);
+                    data.put("robot_head_y", Math.abs(19-(Math.abs(robot.getHead()/15))));
+                    data.put("robot_body_x", robot.getBody()%15);
+                    data.put("robot_body_y", Math.abs(19-(Math.abs(robot.getBody()/15))));
+                    data.put("waypoint_x", robot.getWaypointPosition()%15);
+                    data.put("waypoint_y", Math.abs(19-(Math.abs(robot.getWaypointPosition()/15))));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                JSONObject jsonObject = new JSONObject();
+
+                try {
+                    jsonObject.put("coordinate", data);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                MainActivity.sendMessage(jsonObject.toString());
+            }
+        });
 
         directionView.setOnButtonListener(new InputView.InputEventListener() {
             @Override public void onInputEvent(View view, int buttons) {
@@ -155,8 +255,6 @@ public class RobotFragment extends Fragment implements Observer {
                             movementController.moveForward(robot);
                             break;
                     }
-
-
                 }
                 else{
                     Toast.makeText(fragmentBelongActivity, "WayPoint not set!", Toast.LENGTH_SHORT).show();
@@ -178,7 +276,7 @@ public class RobotFragment extends Fragment implements Observer {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if (b){
-                    fab.setVisibility(View.INVISIBLE);
+                    fab.setVisibility(View.GONE);
                     fab.setActivated(false);
                     Toast.makeText(fragmentBelongActivity, "Auto updating", Toast.LENGTH_SHORT).show();
                     //TODO: implement auto updating
@@ -191,9 +289,9 @@ public class RobotFragment extends Fragment implements Observer {
         });
 
         //set auto buttons to invisible
-        buttonStart.setVisibility(View.INVISIBLE);
+        buttonStart.setVisibility(View.GONE);
         buttonStart.setActivated(false);
-        buttonStop.setVisibility(View.INVISIBLE);
+        buttonStop.setVisibility(View.GONE);
         buttonStop.setActivated(false);
         buttonStop.setEnabled(false);
 
@@ -201,7 +299,7 @@ public class RobotFragment extends Fragment implements Observer {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if(b){ // if auto
-                    directionView.setVisibility(View.INVISIBLE);
+                    directionView.setVisibility(View.GONE);
                     directionView.setActivated(false);
                     buttonStart.setVisibility(View.VISIBLE);
                     buttonStart.setActivated(true);
@@ -212,9 +310,9 @@ public class RobotFragment extends Fragment implements Observer {
                 else{
                     directionView.setVisibility(View.VISIBLE);
                     directionView.setActivated(true);
-                    buttonStart.setVisibility(View.INVISIBLE);
+                    buttonStart.setVisibility(View.GONE);
                     buttonStart.setActivated(false);
-                    buttonStop.setVisibility(View.INVISIBLE);
+                    buttonStop.setVisibility(View.GONE);
                     buttonStop.setActivated(false);
                 }
             }
@@ -263,69 +361,62 @@ public class RobotFragment extends Fragment implements Observer {
     public void update() {
         BluetoothMessage bluetoothMessage = (BluetoothMessage) topic.getUpdate(this);
 
-        JSONObject msg = null;
-
         try {
-            msg = new JSONObject(bluetoothMessage.getMessage());
+            JSONObject msg = new JSONObject(bluetoothMessage.getMessage());
 
-
-            /* To identify the arrows (JSON Format)
-            {"arrow": {
-                "x": 10,
-                "y": 10,
-                "direction": "left",
-                "from": "down"
+            if(msg != null) {
+                if (msg.getString("message") != null && msg.getString("message").length() > 0) {
+                    // To identify the message (JSON Format)
+                    // { "message": "<message>" }
+                    statusTextView.setText(msg.getString("message"));
+                } else if (msg.getJSONObject("arrow") != null) {
+                /* To identify the arrows (JSON Format)
+                { "arrow":
+                    {
+                        "x": 10,
+                        "y": 10,
+                        "direction": "left",
+                        "from": "down"
                     }
                 }
-            */
-            if (msg.getJSONObject("arrow") != null){
-                if(msg.getJSONObject("arrow").getString("direction").equals("up")){
-                    imageAdapter.mThumbIds[Math.abs(19-msg.getJSONObject("arrow").getInt("y")) * 15+msg.getJSONObject("arrow").getInt("x")] = 3;
+                */
+                    if (msg.getJSONObject("arrow").getString("direction").equals("up")) {
+                        imageAdapter.mThumbIds[Math.abs(19 - msg.getJSONObject("arrow").getInt("y")) * 15 + msg.getJSONObject("arrow").getInt("x")] = 3;
 
-                }
-                else if(msg.getJSONObject("arrow").getString("direction").equals("down")){
-                    imageAdapter.mThumbIds[Math.abs(19-msg.getJSONObject("arrow").getInt("y")) * 15+msg.getJSONObject("arrow").getInt("x")] = 4;
+                    } else if (msg.getJSONObject("arrow").getString("direction").equals("down")) {
+                        imageAdapter.mThumbIds[Math.abs(19 - msg.getJSONObject("arrow").getInt("y")) * 15 + msg.getJSONObject("arrow").getInt("x")] = 4;
 
-                }
-                else if(msg.getJSONObject("arrow").getString("direction").equals("left")){
-                    imageAdapter.mThumbIds[Math.abs(19-msg.getJSONObject("arrow").getInt("y")) * 15+msg.getJSONObject("arrow").getInt("x")] = 5;
+                    } else if (msg.getJSONObject("arrow").getString("direction").equals("left")) {
+                        imageAdapter.mThumbIds[Math.abs(19 - msg.getJSONObject("arrow").getInt("y")) * 15 + msg.getJSONObject("arrow").getInt("x")] = 5;
 
-                }
-                else if(msg.getJSONObject("arrow").getString("direction").equals("right")){
-                    imageAdapter.mThumbIds[Math.abs(19-msg.getJSONObject("arrow").getInt("y")) * 15+msg.getJSONObject("arrow").getInt("x")] = 6;
+                    } else if (msg.getJSONObject("arrow").getString("direction").equals("right")) {
+                        imageAdapter.mThumbIds[Math.abs(19 - msg.getJSONObject("arrow").getInt("y")) * 15 + msg.getJSONObject("arrow").getInt("x")] = 6;
 
+                    }
+                    imageAdapter.notifyDataSetChanged();
+                } else if (msg.getString("status") != null && msg.getString("status").length() > 0) {
+                    if (robot.isHeadPosition() && robot.isBodyPosition() && robot.isWaypoint()) {
+                        try {
+                            statusTextView.setText(msg.getString("status"));
+                            switch (msg.getString("status")) {
+                                case "moving right":
+                                    movementController.turnRight(robot);
+                                    break;
+                                case "moving left":
+                                    movementController.turnLeft(robot);
+                                    break;
+                                case "moving forward":
+                                    movementController.moveForward(robot);
+                                    break;
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
-                imageAdapter.notifyDataSetChanged();
             }
         } catch (JSONException e) {
             e.printStackTrace();
-        }
-
-        if (robot.isHeadPosition()&& robot.isBodyPosition() && robot.isWaypoint()){
-            if (msg != null) {
-                try {
-                    statusTextView.setText(msg.getString("status"));
-                    switch (msg.getString("status")) {
-                        case "moving right":
-                            Log.e("RobotFragmentMovement", "moving right");
-                            movementController.turnRight(robot);
-                            break;
-                        case "moving left":
-                            Log.e("RobotFragmentMovement", "moving left");
-                            movementController.turnLeft(robot);
-                            break;
-                        case "moving forward":
-                            movementController.moveForward(robot);
-                            break;
-                    }
-                }
-                catch(Exception e){
-                    e.printStackTrace();
-                }
-            }
-            else {
-                // No new message
-            }
         }
     }
 

@@ -12,21 +12,33 @@
         android:layout_marginRight="8dp"
         android:background="@drawable/bubble"
         android:orientation="vertical"
-        android:padding="8dp">
+        android:padding="4dp">
 
         <TextView
-            android:id="@+id/textViewNoMessage"
+            android:id="@+id/textViewSender"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sample Left"
-            android:textColor="#fff" />
+            android:textColor="#FF803B" />
+        
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="4dp" />
+
+        <TextView
+            android:id="@+id/textViewMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="4dp" />
 
         <TextView
             android:id="@+id/textViewTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:text="12:12 12/12/2012"
             android:textColor="@color/colorAccent" />
     </LinearLayout>
 

@@ -57,27 +57,54 @@ public class MovementController {
     public void setHead(Robot robot){
         imageAdapter.mThumbIds[robot.getHead()] = 9;
         imageAdapter.notifyDataSetChanged();
+        robot.setWaypointPosition(-1); //to indicate no waypoint
+    }
+
+    public void clearRobot(Robot robot){
+        imageAdapter.mThumbIds[robot.getBody()] = 0;
+        //4 corners
+        imageAdapter.mThumbIds[robot.getBody()-14] = 0; //set the whole body
+        imageAdapter.mThumbIds[robot.getBody()-16] = 0;
+        imageAdapter.mThumbIds[robot.getBody()+14] = 0;
+        imageAdapter.mThumbIds[robot.getBody()+16] = 0;
+
+        //the rest
+        imageAdapter.mThumbIds[robot.getBody()+1] = 0;
+        imageAdapter.mThumbIds[robot.getBody()-1] = 0;
+        imageAdapter.mThumbIds[robot.getBody()+15] = 0;
+        imageAdapter.mThumbIds[robot.getBody()-15] = 0;
+
+        robot.setBody(-1);
+        robot.setHead(-1);
+
+        imageAdapter.notifyDataSetChanged();
+    }
+
+    public void clearWayPoint(Robot robot){
+        imageAdapter.mThumbIds[robot.getWaypointPosition()] = 0;
+        robot.setWaypointPosition(-1);
+        imageAdapter.notifyDataSetChanged();
     }
 
     public void setWayPoint(Robot robot, TextView statusTextView) {
-        if (    robot.getWaypointPosition() == robot.getBody()||
-                robot.getWaypointPosition() == robot.getBody()-14 ||
-                robot.getWaypointPosition() == robot.getBody()-16 ||
-                robot.getWaypointPosition() == robot.getBody()+14 ||
-                robot.getWaypointPosition() == robot.getBody()+16 ||
-                robot.getWaypointPosition() == robot.getBody()+1 ||
-                robot.getWaypointPosition() == robot.getBody()-1 ||
-                robot.getWaypointPosition() == robot.getBody()+15 ||
-                robot.getWaypointPosition() == robot.getBody()-15){
-
-            Toast.makeText(callingActivity, "Unable to set waypoint here", Toast.LENGTH_SHORT).show();
-        }
-        else{
+        // if (    robot.getWaypointPosition() == robot.getBody()||
+        //         robot.getWaypointPosition() == robot.getBody()-14 ||
+        //         robot.getWaypointPosition() == robot.getBody()-16 ||
+        //         robot.getWaypointPosition() == robot.getBody()+14 ||
+        //         robot.getWaypointPosition() == robot.getBody()+16 ||
+        //         robot.getWaypointPosition() == robot.getBody()+1 ||
+        //         robot.getWaypointPosition() == robot.getBody()-1 ||
+        //         robot.getWaypointPosition() == robot.getBody()+15 ||
+        //         robot.getWaypointPosition() == robot.getBody()-15){
+        //
+        //     Toast.makeText(callingActivity, "Unable to set waypoint here", Toast.LENGTH_SHORT).show();
+        // }
+        // else{
             imageAdapter.mThumbIds[robot.getWaypointPosition()] = 10; //unexplored waypoint
-            statusTextView.setText("Way point: "+robot.getWaypointPosition()%15+", "+Math.abs(robot.getWaypointPosition()/15));
+            statusTextView.setText("Way point: "+robot.getWaypointPosition()%15+", "+Math.abs(19-(Math.abs(robot.getWaypointPosition()/15))));
 
             imageAdapter.notifyDataSetChanged();
-        }
+        // }
     }
 
     private int turnRightwhenFaceRight(Robot robot){

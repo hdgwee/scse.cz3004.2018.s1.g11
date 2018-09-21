@@ -32,7 +32,7 @@ public class PersistentController {
         l1.setText(sharedPreferences.getString(Config.F1_BUTTON, ""));
         l2.setText(sharedPreferences.getString(Config.F2_BUTTON, ""));
 
-        alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        alert.setPositiveButton("Save", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString(Config.F1_BUTTON, l1.getText().toString().trim());
@@ -41,7 +41,7 @@ public class PersistentController {
             }
         });
 
-        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        alert.setNegativeButton("Discard", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 // cancel
             }

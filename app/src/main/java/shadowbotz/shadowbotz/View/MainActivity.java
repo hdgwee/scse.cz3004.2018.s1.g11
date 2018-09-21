@@ -125,6 +125,9 @@ public class MainActivity extends AppCompatActivity {
 
                     bluetoothMessagingService.connect(device, true);
                 }
+                else {
+                    bluetoothMessagingService.start();
+                }
                 break;
             case Config.REQUEST_CONNECT_DEVICE_INSECURE:
                 // When DeviceListActivity returns with a device to connect
@@ -150,6 +153,9 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     bluetoothMessagingService.connect(device, true);
+                }
+                else {
+                    bluetoothMessagingService.start();
                 }
                 break;
             case Config.REQUEST_ENABLE_BT:
@@ -198,12 +204,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
+        super.onResume();
 
         if (actionBar != null) {
             actionBar.setTitle("shadowbotz - " + Config.current_bluetooth_state);
         }
-
-        super.onResume();
     }
 
     @Override

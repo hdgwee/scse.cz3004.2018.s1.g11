@@ -41,6 +41,9 @@ public class BluetoothMessageAdapter extends RecyclerView.Adapter<BluetoothMessa
     public void onBindViewHolder(BluetoothMessageAdapter.ChatViewHolder holder, int position) {
         BluetoothMessage BluetoothMessage = BluetoothMessageList.get(position);
 
+        String sender = BluetoothMessage.getDeviceName();
+        holder.textViewSender.setText(sender);
+
         holder.textViewMessage.setText(BluetoothMessage.getMessage());
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy h:mm a", Locale.ENGLISH);
@@ -72,7 +75,7 @@ public class BluetoothMessageAdapter extends RecyclerView.Adapter<BluetoothMessa
 
     public class ChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        TextView textViewMessage, textViewTime;
+        TextView textViewSender, textViewMessage, textViewTime;
         LinearLayout layoutForMessage;
         ListViewListener mListViewListener;
 
@@ -81,7 +84,8 @@ public class BluetoothMessageAdapter extends RecyclerView.Adapter<BluetoothMessa
 
             itemView.setOnClickListener(this);
 
-            textViewMessage = (TextView) itemView.findViewById(R.id.textViewNoMessage);
+            textViewSender = (TextView) itemView.findViewById(R.id.textViewSender);
+            textViewMessage = (TextView) itemView.findViewById(R.id.textViewMessage);
             textViewTime = (TextView) itemView.findViewById(R.id.textViewTime);
             layoutForMessage = (LinearLayout) itemView.findViewById(R.id.layoutForMessage);
 
