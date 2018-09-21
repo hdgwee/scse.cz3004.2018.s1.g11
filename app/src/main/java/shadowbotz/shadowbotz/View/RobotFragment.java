@@ -84,12 +84,12 @@ public class RobotFragment extends Fragment implements Observer {
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() { //set robot body and head
             public void onItemClick(AdapterView<?> parent, View v,
                                     int position, long id) {
-                if((position%15>=1 && position%15<=13) && (Math.abs(position/15) >=1 && Math.abs(position/15) <=18)){
+                if((position%15>=1 && position%15<=13) && Math.abs(19-(Math.abs(position/15))) >=1 && Math.abs(19-(Math.abs(position/15))) <=18){
                     if(!robot.isBodyPosition()){
                         robot.setBody(position);
                         movementController.setBody(robot); //set the starting position of the robot
                         robot.setBodyPosition(true);
-                        MainActivity.sendMessage("Way point: " +robot.getBody()%15 +", "+Math.abs(robot.getBody()/15));
+                        MainActivity.sendMessage("Way point: " +robot.getBody()%15 +", "+ Math.abs(19-(Math.abs(position/15))));
 
                     }
                     else if(!robot.isHeadPosition()){
@@ -97,7 +97,7 @@ public class RobotFragment extends Fragment implements Observer {
                         if(robot.getHead() == robot.getBody()+1 || robot.getHead() == robot.getBody()-1 || robot.getHead() == robot.getBody()+15 || robot.getHead() == robot.getBody()-15 ){  //make sure head is at the correct position
                             movementController.setHead(robot);
                             robot.setHeadPosition(true);
-                            MainActivity.sendMessage("Way point: " +robot.getHead()%15 +", "+Math.abs(robot.getHead()/15));
+                            MainActivity.sendMessage("Way point: " +robot.getHead()%15 +", "+ Math.abs(19-(Math.abs(position/15))));
 
                         }
                         else{
@@ -121,7 +121,7 @@ public class RobotFragment extends Fragment implements Observer {
                     robot.setWaypointPosition(i);
                     movementController.setWayPoint(robot, statusTextView);
                     robot.setWaypoint(true);
-                    MainActivity.sendMessage("Way point: "+robot.getWaypointPosition()%15  +", "+Math.abs(robot.getWaypointPosition()/15));
+                    MainActivity.sendMessage("Way point: "+ robot.getWaypointPosition()%15  +", "+Math.abs(19-(Math.abs(robot.getWaypointPosition()/15))));
 
                 }
                 else if(robot.isHeadPosition()&& robot.isBodyPosition() && robot.isWaypoint()){
@@ -146,16 +146,13 @@ public class RobotFragment extends Fragment implements Observer {
                             break;
                         case DirectionView.DIRECTION_RIGHT:
                             movementController.turnRight(robot);
-                            // MainActivity.sendMessage("tr");
                             break;
 
                         case DirectionView.DIRECTION_LEFT:
                             movementController.turnLeft(robot);
-                            // MainActivity.sendMessage("tl");
                             break;
                         case DirectionView.DIRECTION_UP: //move forward
                             movementController.moveForward(robot);
-                            // MainActivity.sendMessage("f");
                             break;
                     }
 
@@ -283,19 +280,19 @@ public class RobotFragment extends Fragment implements Observer {
             */
             if (msg.getJSONObject("arrow") != null){
                 if(msg.getJSONObject("arrow").getString("direction").equals("up")){
-                    imageAdapter.mThumbIds[msg.getJSONObject("arrow").getInt("y")*15+msg.getJSONObject("arrow").getInt("x")] = 3;
+                    imageAdapter.mThumbIds[Math.abs(19-msg.getJSONObject("arrow").getInt("y")) * 15+msg.getJSONObject("arrow").getInt("x")] = 3;
 
                 }
                 else if(msg.getJSONObject("arrow").getString("direction").equals("down")){
-                    imageAdapter.mThumbIds[msg.getJSONObject("arrow").getInt("y")*15+msg.getJSONObject("arrow").getInt("x")] = 4;
+                    imageAdapter.mThumbIds[Math.abs(19-msg.getJSONObject("arrow").getInt("y")) * 15+msg.getJSONObject("arrow").getInt("x")] = 4;
 
                 }
                 else if(msg.getJSONObject("arrow").getString("direction").equals("left")){
-                    imageAdapter.mThumbIds[msg.getJSONObject("arrow").getInt("y")*15+msg.getJSONObject("arrow").getInt("x")] = 5;
+                    imageAdapter.mThumbIds[Math.abs(19-msg.getJSONObject("arrow").getInt("y")) * 15+msg.getJSONObject("arrow").getInt("x")] = 5;
 
                 }
                 else if(msg.getJSONObject("arrow").getString("direction").equals("right")){
-                    imageAdapter.mThumbIds[msg.getJSONObject("arrow").getInt("y")*15+msg.getJSONObject("arrow").getInt("x")] = 6;
+                    imageAdapter.mThumbIds[Math.abs(19-msg.getJSONObject("arrow").getInt("y")) * 15+msg.getJSONObject("arrow").getInt("x")] = 6;
 
                 }
                 imageAdapter.notifyDataSetChanged();
