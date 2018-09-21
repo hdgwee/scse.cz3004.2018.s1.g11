@@ -73,6 +73,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setElevation(0);
+        }
+
         requestForAccessFineLocationPermission();
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -273,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 if (actionBar != null) {
-                    actionBar.setTitle("shadowbotz - " + Config.current_bluetooth_state);
+                    actionBar.setTitle("SHADOWBOTZ - " + Config.current_bluetooth_state);
                 }
 
             } else if (msg.what == Config.MESSAGE_WRITE) {

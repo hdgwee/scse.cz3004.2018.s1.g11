@@ -102,8 +102,7 @@ public class BluetoothMessageLogFragment extends Fragment implements Observer {
                 // Send a message using content of the edit text widget
                 View view = getView();
                 if (null != view) {
-                    TextView textView = view.findViewById(R.id.editTextOutgoingMessage);
-                    String message = textView.getText().toString();
+                    String message = editTextOutgoingMessage.getText().toString();
                     sendMessage(message);
                     editTextOutgoingMessage.setText("");
                 }
@@ -136,6 +135,11 @@ public class BluetoothMessageLogFragment extends Fragment implements Observer {
     @Override
     public void onResume() {
         MainActivity.bluetoothSubject.register(this);
+
+        if(!Config.current_bluetooth_state.contains("Connected to")) {
+            buttonSend.setEnabled(false);
+            editTextOutgoingMessage.setEnabled(false);
+        }
 
         super.onResume();
     }
