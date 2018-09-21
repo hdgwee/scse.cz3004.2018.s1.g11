@@ -1,6 +1,11 @@
 package shadowbotz.shadowbotz.Controller;
 
 
+import android.icu.text.LocaleDisplayNames;
+import android.util.Log;
+
+import java.math.BigInteger;
+
 public class DescriptorStringController {
 
     private ImageAdapter imageAdapter;
@@ -21,5 +26,30 @@ public class DescriptorStringController {
             imageAdapter.mThumbIds[Math.abs(19-y) * 15 + x] = 3;
         }
         imageAdapter.notifyDataSetChanged();
+    }
+
+    public int descriptorString1(String descriptorString1){
+        // 38 bytes in total
+
+        String padded = new BigInteger(descriptorString1, 16).toString(2);
+
+        //pad string with leading zeros
+        String formatPad = "%" + (descriptorString1.length() * 4) + "s";
+        padded = String.format(formatPad, padded).replace(" ", "0");
+
+        padded = padded.substring(2, padded.length()-2);
+
+        Integer[] integers = new Integer[padded.length()];
+        // Creates the integer array.
+        for (int i = 0; i < integers.length; i++) {
+            integers[i] = Integer.parseInt(String.valueOf(padded.charAt(((19-Math.abs(i/15))*15) + (i%15)))); //((19-Math.abs(i/15))*15) + (i%15)) =>to convert the axis
+        }
+        imageAdapter.mThumbIds = integers;
+        imageAdapter.notifyDataSetChanged();
+        return padded.length();
+    }
+
+    public void descriptorString2(){
+
     }
 }

@@ -30,6 +30,7 @@ import org.json.JSONObject;
 import shadowbotz.shadowbotz.BluetoothObserverSubject.Observer;
 import shadowbotz.shadowbotz.BluetoothObserverSubject.Subject;
 import shadowbotz.shadowbotz.Config;
+import shadowbotz.shadowbotz.Controller.DescriptorStringController;
 import shadowbotz.shadowbotz.Controller.ImageAdapter;
 import shadowbotz.shadowbotz.Controller.MovementController;
 import shadowbotz.shadowbotz.Model.Robot;
@@ -68,7 +69,7 @@ public class RobotFragment extends Fragment implements Observer {
         // Get Fragment belonged Activity
         final FragmentActivity fragmentBelongActivity = getActivity();
         final FloatingActionButton fab =  view.findViewById(R.id.fab);
-        final SharedPreferences sharedPreferences = fragmentBelongActivity.getSharedPreferences(Config.SHARED_PREF_NAME, Context.MODE_PRIVATE); //TODO: to test sharedpreference;
+        final SharedPreferences sharedPreferences = fragmentBelongActivity.getSharedPreferences(Config.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         final DirectionView directionView = (DirectionView) view.findViewById(R.id.viewDirection);
 
         final Switch switchMovement = view.findViewById(R.id.switchMovement);
@@ -102,6 +103,12 @@ public class RobotFragment extends Fragment implements Observer {
 
         GridView gridview = (GridView) view.findViewById(R.id.gridview);
         gridview.setAdapter(imageAdapter);
+
+        DescriptorStringController descriptorStringController = new DescriptorStringController(imageAdapter);
+
+        //testing descriptorstring 1
+        descriptorStringController.descriptorString1("FFC07F80FF01FE03FFFFFFF3FFE7FFCFFF9C7F38FE71FCE3F87FF0FFE1FFC3FF87FF0E0E1C1F");
+//        descriptorStringController.descriptorString1("7000000000000000000000000000000000000000000000000000000000000000000000000000");
 
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() { //set robot body and head
             public void onItemClick(AdapterView<?> parent, View v,
