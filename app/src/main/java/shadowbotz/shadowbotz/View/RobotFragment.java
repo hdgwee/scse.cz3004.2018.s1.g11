@@ -37,6 +37,8 @@ import shadowbotz.shadowbotz.Model.Robot;
 import shadowbotz.shadowbotz.Model.BluetoothMessage;
 import shadowbotz.shadowbotz.R;
 
+import static android.content.ContentValues.TAG;
+
 public class RobotFragment extends Fragment implements Observer {
 
 
@@ -246,21 +248,29 @@ public class RobotFragment extends Fragment implements Observer {
                     switch (buttons&0xff) {
                         case DirectionView.DIRECTION_DOWN:
 
-                            /*Whole block here should be called when receiving descriptor string from Rpi*/
-                            //testing descriptorstring 1
-                            descriptorStringController.descriptorString1("7000000000000000000000000000000000000000000000000000000000000000000000000000");
-                            descriptorStringController.descriptorString1("FFC07F80FF01FE03FFFFFFF3FFE7FFCFFF9C7F38FE71FCE3F87FF0FFE1FFC3FF87FF0E0E1C1F");
+                            /* Format of the string to retrieve from Rpi
+                           {
+                            "map": "FFC07F80FF01FE03FFFFFFF3FFE7FFCFFF9C7F38FE71FCE3F87FF0FFE1FFC3FF87FF0E0E1C1F",
+                            "obstacle": "00000100001C80000000001C0000080000060001C00000080000",
+                            "arrows": "(6, 5, D),(3, 9, R),(1, 15, D),(7, 19, L),(14, 14, U)",
+                            "robotCenter": "(1, 1)",
+                            "robotHead": "(2, 1)"
+                            }
+                           */
 
-                            //testing descriptorString 2
-                            descriptorStringController.descriptorString2("00000100001C80000000001C0000080000060001C00000080000");
-                            descriptorStringController.descriptorString2("00000100001C80000000001C0000080000060001C00000080000");
-
-                            //testing setting of arrows
-                            descriptorStringController.splitImageString("(6, 5, D),(3, 9, R),(1, 15, D),(7, 19, L),(14, 14, U)");
-                            descriptorStringController.checkIfWaypointVisited(robot);
-                            descriptorStringController.updateRobotPosition(robot);
-
-                            //End of testing
+                            JSONObject obj = new JSONObject();
+                            try{
+                                obj.put("map", "FFC07F80FF01FE03FFFFFFF3FFE7FFCFFF9C7F38FE71FCE3F87FF0FFE1FFC3FF87FF0E0E1C1F");
+                                obj.put("obstacle", "00000100001C80000000001C0000080000060001C00000080000");
+                                obj.put("arrows", "(6, 5, D),(3, 9, R),(1, 15, D),(7, 19, L),(14, 14, U)");
+                                obj.put("robotCenter", "(1, 1)");
+                                obj.put("robotHead", "(2, 1)");
+                            }
+                            catch (JSONException e){
+                                Log.d(TAG, "onInputEvent: "+ e);
+                            }
+                            //TODO: call processJSONDescriptorString function when receiving obj (JSONObject) from RPi to update the map
+                            descriptorStringController.processJSONDescriptorString(obj, robot);
 
                             break;
                         case DirectionView.DIRECTION_RIGHT:
@@ -276,7 +286,7 @@ public class RobotFragment extends Fragment implements Observer {
                     }
                 }
                 else{
-                    Toast.makeText(fragmentBelongActivity, "WayPoint not set!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(fragmentBelongActivity, "Robot not set!", Toast.LENGTH_SHORT).show();
                 }
 
             }

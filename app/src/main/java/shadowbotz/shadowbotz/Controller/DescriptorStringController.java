@@ -1,8 +1,15 @@
 package shadowbotz.shadowbotz.Controller;
 
+import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.math.BigInteger;
 
 import shadowbotz.shadowbotz.Model.Robot;
+
+import static android.content.ContentValues.TAG;
 
 public class DescriptorStringController {
 
@@ -106,6 +113,7 @@ public class DescriptorStringController {
     }
 
     public void updateRobotPosition(Robot robot){ //For auto updating the map with robot
+        //TODO: Require Rpi to send position of head and center of body for every movement
 
         imageAdapter.mThumbIds[robot.getBody()] = 8;
         //4 corners
@@ -123,5 +131,46 @@ public class DescriptorStringController {
         imageAdapter.mThumbIds[robot.getHead()] = 9; //color the head of robot
 
         imageAdapter.notifyDataSetChanged();
+    }
+
+
+    public void processJSONDescriptorString(JSONObject jsonObject, Robot robot){
+        /*Whole block here should be called when receiving descriptor string from Rpi*/
+        if(jsonObject != null){
+           try{
+               descriptorString1(jsonObject.getString("map"));
+
+
+
+               descriptorString2(jsonObject.getString("obstacle"));
+
+               //testing setting of arrows
+               splitImageString(jsonObject.getString("arrows"));
+
+               String head = jsonObject.getString("robotHead");
+               head = head.substring(1, head.length()-1);
+               String[] process_head = head.split(", ");
+
+               int x_head = Integer.parseInt(process_head[0]);
+               int y_head = Integer.parseInt(process_head[1]);
+
+               robot.setHead(Math.abs(19-y_head) * 15 + x_head);
+
+               String body = jsonObject.getString("robotCenter");
+               body = body.substring(1, body.length()-1);
+               String[] process_body = body.split(", ");
+               int x_body = Integer.parseInt(process_body[0]);
+               int y_body = Integer.parseInt(process_body[1]);
+
+               robot.setBody(Math.abs(19-y_body) * 15 + x_body);
+               updateRobotPosition(robot);
+
+               checkIfWaypointVisited(robot);
+           }
+           catch(JSONException e){
+               Log.d(TAG, "processJSONDescriptorString: "+ e);
+           }
+        }
+
     }
 }
