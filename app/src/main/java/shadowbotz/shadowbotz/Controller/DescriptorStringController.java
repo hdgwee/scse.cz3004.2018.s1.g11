@@ -1,15 +1,15 @@
 package shadowbotz.shadowbotz.Controller;
 
-import android.util.Log;
-
 import java.math.BigInteger;
 
-import static android.content.ContentValues.TAG;
+import shadowbotz.shadowbotz.Model.Robot;
 
 public class DescriptorStringController {
 
     private ImageAdapter imageAdapter;
-    private String originalDescriptorString;
+    private String originalDescriptorString1;
+    private String originalDescriptorString2;
+    private String originalArrowDescriptorString;
     private int numberOfExploredTiles =0; //use this to check if there is any padding
 
     public DescriptorStringController(ImageAdapter imageAdapter) {
@@ -25,7 +25,9 @@ public class DescriptorStringController {
             String[] temp = s.split(", ");
             int x = Integer.parseInt(temp[0]);
             int y = Integer.parseInt(temp[1]);
+
             imageAdapter.mThumbIds[Math.abs(19-y) * 15 + x] = 3;
+            imageAdapter.currentMapWithNoRobot[Math.abs(19-y) * 15 + x] = 3;
         }
         imageAdapter.notifyDataSetChanged();
     }
@@ -39,7 +41,7 @@ public class DescriptorStringController {
         padded = String.format(formatPad, padded).replace(" ", "0");
 
         padded = padded.substring(2, padded.length()-2);
-        originalDescriptorString = padded;
+        originalDescriptorString1 = padded;
 
         Integer[] integers = new Integer[padded.length()];
         // Creates the integer array.
@@ -49,7 +51,8 @@ public class DescriptorStringController {
                 numberOfExploredTiles++;
             }
         }
-        imageAdapter.mThumbIds = integers;
+//        imageAdapter.mThumbIds = integers;
+        System.arraycopy(integers, 0, imageAdapter.currentMapWithNoRobot, 0, integers.length);
         imageAdapter.notifyDataSetChanged();
 
     }
@@ -66,9 +69,9 @@ public class DescriptorStringController {
         padded = padded.substring(0, padded.length()-numOfPaddings);
 
         int count = 0;
-        char[] charOfOriginalDescriptorString = originalDescriptorString.toCharArray();
+        char[] charOfOriginalDescriptorString = originalDescriptorString1.toCharArray();
 
-        for (int i=0; i< originalDescriptorString.length(); i++){
+        for (int i = 0; i< originalDescriptorString1.length(); i++){
             if(String.valueOf(charOfOriginalDescriptorString[i]).equals("1")){
                 if(String.valueOf(padded.charAt(count)).equals("1")){
                     charOfOriginalDescriptorString[i] = '2';
@@ -83,9 +86,42 @@ public class DescriptorStringController {
         for (int i = 0; i < integers.length; i++) {
             integers[i] = Integer.parseInt(String.valueOf(temp.charAt(((19-Math.abs(i/15))*15) + (i%15)))); //((19-Math.abs(i/15))*15) + (i%15)) =>to convert the axis
         }
-        imageAdapter.mThumbIds = integers;
+//        imageAdapter.mThumbIds = integers;
+        System.arraycopy(integers, 0, imageAdapter.mThumbIds, 0, integers.length);
+        System.arraycopy(integers, 0, imageAdapter.currentMapWithNoRobot, 0, integers.length);
         imageAdapter.notifyDataSetChanged();
-        Log.d(TAG, "descriptorString1: "+ padded);
+    }
 
+    public void checkIfWaypointVisited(Robot robot){  //For auto updating the map with the waypoint
+        if(robot.getWaypointPosition()!= 0){
+            if(imageAdapter.currentMapWithNoRobot[robot.getWaypointPosition()] == 1){
+                imageAdapter.mThumbIds[robot.getWaypointPosition()] = 11; //explored waypoint
+            }
+            else{
+                imageAdapter.mThumbIds[robot.getWaypointPosition()] = 10; //unexplored waypoint
+            }
+            imageAdapter.notifyDataSetChanged();
+        }
+
+    }
+
+    public void updateRobotPosition(Robot robot){ //For auto updating the map with robot
+
+        imageAdapter.mThumbIds[robot.getBody()] = 8;
+        //4 corners
+        imageAdapter.mThumbIds[robot.getBody()-14] = 8; //set the whole body
+        imageAdapter.mThumbIds[robot.getBody()-16] = 8;
+        imageAdapter.mThumbIds[robot.getBody()+14] = 8;
+        imageAdapter.mThumbIds[robot.getBody()+16] = 8;
+
+        //the rest
+        imageAdapter.mThumbIds[robot.getBody()+1] = 8;
+        imageAdapter.mThumbIds[robot.getBody()-1] = 8;
+        imageAdapter.mThumbIds[robot.getBody()+15] = 8;
+        imageAdapter.mThumbIds[robot.getBody()-15] = 8;
+
+        imageAdapter.mThumbIds[robot.getHead()] = 9; //color the head of robot
+
+        imageAdapter.notifyDataSetChanged();
     }
 }

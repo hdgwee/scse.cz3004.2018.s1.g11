@@ -104,20 +104,7 @@ public class RobotFragment extends Fragment implements Observer {
         GridView gridview = (GridView) view.findViewById(R.id.gridview);
         gridview.setAdapter(imageAdapter);
 
-        DescriptorStringController descriptorStringController = new DescriptorStringController(imageAdapter);
-
-        //testing descriptorstring 1
-//        descriptorStringController.descriptorString1("7000000000000000000000000000000000000000000000000000000000000000000000000000");
-        descriptorStringController.descriptorString1("FFC07F80FF01FE03FFFFFFF3FFE7FFCFFF9C7F38FE71FCE3F87FF0FFE1FFC3FF87FF0E0E1C1F");
-
-        //testing descriptorString 2
-        descriptorStringController.descriptorString2("00000100001C80000000001C0000080000060001C00000080000");
-        descriptorStringController.descriptorString2("00000100001C80000000001C0000080000060001C00000080000");
-
-        //testing setting of arrows
-        descriptorStringController.splitImageString("(6, 5, D),(3, 9, R),(1, 15, D),(7, 19, L),(14, 14, U)");
-
-        //End of testing
+        final DescriptorStringController descriptorStringController = new DescriptorStringController(imageAdapter);
 
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() { //set robot body and head
             public void onItemClick(AdapterView<?> parent, View v,
@@ -255,10 +242,26 @@ public class RobotFragment extends Fragment implements Observer {
         directionView.setOnButtonListener(new InputView.InputEventListener() {
             @Override public void onInputEvent(View view, int buttons) {
 
-                if(robot.isWaypoint() && robot.isBodyPosition() && robot.isHeadPosition()){
+                if(robot.isBodyPosition() && robot.isHeadPosition()){
                     switch (buttons&0xff) {
                         case DirectionView.DIRECTION_DOWN:
-                            Toast.makeText(fragmentBelongActivity, "Not in use!", Toast.LENGTH_SHORT).show();
+
+                            /*Whole block here should be called when receiving descriptor string from Rpi*/
+                            //testing descriptorstring 1
+                            descriptorStringController.descriptorString1("7000000000000000000000000000000000000000000000000000000000000000000000000000");
+                            descriptorStringController.descriptorString1("FFC07F80FF01FE03FFFFFFF3FFE7FFCFFF9C7F38FE71FCE3F87FF0FFE1FFC3FF87FF0E0E1C1F");
+
+                            //testing descriptorString 2
+                            descriptorStringController.descriptorString2("00000100001C80000000001C0000080000060001C00000080000");
+                            descriptorStringController.descriptorString2("00000100001C80000000001C0000080000060001C00000080000");
+
+                            //testing setting of arrows
+                            descriptorStringController.splitImageString("(6, 5, D),(3, 9, R),(1, 15, D),(7, 19, L),(14, 14, U)");
+                            descriptorStringController.checkIfWaypointVisited(robot);
+                            descriptorStringController.updateRobotPosition(robot);
+
+                            //End of testing
+
                             break;
                         case DirectionView.DIRECTION_RIGHT:
                             movementController.turnRight(robot);
