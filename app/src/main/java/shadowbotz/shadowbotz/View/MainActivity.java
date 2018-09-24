@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -23,6 +24,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import java.util.Calendar;
@@ -53,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
     private Set<BluetoothDevice> pairedDevices;
     private ActionBar actionBar;
 
+    private PowerManager.WakeLock wl;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +64,10 @@ public class MainActivity extends AppCompatActivity {
         Realm.init(this);
 
         setContentView(R.layout.activity_main);
+
+        // Full Screen
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         sharedPreferences = getSharedPreferences(Config.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
@@ -97,6 +105,12 @@ public class MainActivity extends AppCompatActivity {
 
         bluetoothMessagingService = new BluetoothMessagingService(null, mHandler);
         bluetoothMessagingService.start();
+
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        if (pm != null) {
+            wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "shadowbotz");
+            wl.acquire(10*60*1000L /*10 minutes*/);
+        }
     }
 
     @Override
@@ -200,6 +214,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        if(wl != null) {
+            wl.release();
+        }
 
         if (bluetoothMessagingService != null) {
             bluetoothMessagingService.stop();
