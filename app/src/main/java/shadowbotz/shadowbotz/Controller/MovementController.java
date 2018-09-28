@@ -259,7 +259,6 @@ public class MovementController {
             robot.setHead(turnLeftwhenFaceDown(robot));
         }
         checkIfWaypointIsExplored(robot);
-        MainActivity.sendMessage("tl");
         imageAdapter.notifyDataSetChanged();
     }
 
@@ -281,7 +280,6 @@ public class MovementController {
             robot.setHead(turnRightwhenFaceDown(robot));
         }
         checkIfWaypointIsExplored(robot);
-        MainActivity.sendMessage("tr");
         imageAdapter.notifyDataSetChanged();
     }
 
@@ -312,7 +310,6 @@ public class MovementController {
                 robot.setBody(robot.getBody()+15);
             }
             checkIfWaypointIsExplored(robot);
-            MainActivity.sendMessage("f");
             imageAdapter.notifyDataSetChanged();
         }
         else{
@@ -332,6 +329,15 @@ public class MovementController {
         }
         else if(imageAdapter.currentMapWithNoRobot[position] == 3){ //arrow
             imageAdapter.mThumbIds[position] =3;
+        }
+        else if(imageAdapter.currentMapWithNoRobot[position] == 4){ //arrow
+            imageAdapter.mThumbIds[position] =4;
+        }
+        else if(imageAdapter.currentMapWithNoRobot[position] == 5){ //arrow
+            imageAdapter.mThumbIds[position] =5;
+        }
+        else if(imageAdapter.currentMapWithNoRobot[position] == 6){ //arrow
+            imageAdapter.mThumbIds[position] =6;
         }
         else if(imageAdapter.currentMapWithNoRobot[position] == 10){ //unexplored waypoint
             imageAdapter.mThumbIds[position] =10;

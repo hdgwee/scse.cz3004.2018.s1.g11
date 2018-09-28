@@ -24,19 +24,33 @@ public class DescriptorStringController {
     }
 
     public void splitImageString(String arrowString){
-        /*Example: (6, 5, D),(3, 9, R),(1, 15, D),(7, 19, L),(14, 14, U)*/
-        arrowString = arrowString.substring(1, arrowString.length()-1);
-        String[] processedArrowString = arrowString.split("\\),\\(");
+        if(arrowString != null && !arrowString.isEmpty()){
+            /*Example: (6, 5, D),(3, 9, R),(1, 15, D),(7, 19, L),(14, 14, U)*/
+            arrowString = arrowString.substring(1, arrowString.length()-1);
+            String[] processedArrowString = arrowString.split("\\),\\(");
 
-        for (String s : processedArrowString){
-            String[] temp = s.split(", ");
-            int x = Integer.parseInt(temp[0]);
-            int y = Integer.parseInt(temp[1]);
+            for (String s : processedArrowString){
+                String[] temp = s.split(", ");
+                int x = Integer.parseInt(temp[0]);
+                int y = Integer.parseInt(temp[1]);
 
-            imageAdapter.mThumbIds[Math.abs(19-y) * 15 + x] = 3;
-            imageAdapter.currentMapWithNoRobot[Math.abs(19-y) * 15 + x] = 3;
+                if(temp[2].equals("U")){
+                    imageAdapter.mThumbIds[Math.abs(19-y) * 15 + x] = 3;
+                    imageAdapter.currentMapWithNoRobot[Math.abs(19-y) * 15 + x] = 3;
+                }
+                else if (temp[2].equals("D")){
+                    imageAdapter.mThumbIds[Math.abs(19-y) * 15 + x] = 4;
+                    imageAdapter.currentMapWithNoRobot[Math.abs(19-y) * 15 + x] = 4;
+                }else if (temp[2].equals("L")){
+                    imageAdapter.mThumbIds[Math.abs(19-y) * 15 + x] = 5;
+                    imageAdapter.currentMapWithNoRobot[Math.abs(19-y) * 15 + x] = 5;
+                }else if (temp[2].equals("R")){
+                    imageAdapter.mThumbIds[Math.abs(19-y) * 15 + x] = 6;
+                    imageAdapter.currentMapWithNoRobot[Math.abs(19-y) * 15 + x] = 6;
+                }
+            }
+            imageAdapter.notifyDataSetChanged();
         }
-        imageAdapter.notifyDataSetChanged();
     }
 
     public void descriptorString1(String descriptorString1){

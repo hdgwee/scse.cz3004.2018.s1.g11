@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,8 +35,6 @@ import shadowbotz.shadowbotz.Model.Robot;
 import shadowbotz.shadowbotz.Model.BluetoothMessage;
 import shadowbotz.shadowbotz.R;
 
-import static android.content.ContentValues.TAG;
-
 public class RobotFragment extends Fragment implements Observer {
 
 
@@ -59,6 +55,11 @@ public class RobotFragment extends Fragment implements Observer {
     private boolean canSetRobot = false;
     private boolean canSendCoords = false;
 
+    private JSONObject latestGridAction;
+
+
+    private DescriptorStringController descriptorStringController;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -74,7 +75,7 @@ public class RobotFragment extends Fragment implements Observer {
         final SharedPreferences sharedPreferences = fragmentBelongActivity.getSharedPreferences(Config.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         final DirectionView directionView = (DirectionView) view.findViewById(R.id.viewDirection);
 
-        final Switch switchMovement = view.findViewById(R.id.switchMovement);
+        final Switch switchMovement = view.findViewById(R.id.switchNavigation);
         final Switch switchUpdate = view.findViewById(R.id.switchUpdate);
         final Button buttonStart = view.findViewById(R.id.buttonStart);
         final Button buttonStop = view.findViewById(R.id.buttonStop);
@@ -106,7 +107,7 @@ public class RobotFragment extends Fragment implements Observer {
         GridView gridview = (GridView) view.findViewById(R.id.gridview);
         gridview.setAdapter(imageAdapter);
 
-        final DescriptorStringController descriptorStringController = new DescriptorStringController(imageAdapter);
+        descriptorStringController = new DescriptorStringController(imageAdapter);
 
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() { //set robot body and head
             public void onItemClick(AdapterView<?> parent, View v,
@@ -247,41 +248,20 @@ public class RobotFragment extends Fragment implements Observer {
                 if(robot.isBodyPosition() && robot.isHeadPosition()){
                     switch (buttons&0xff) {
                         case DirectionView.DIRECTION_DOWN:
-
-                            /* Format of the string to retrieve from Rpi
-                           {
-                            "map": "FFC07F80FF01FE03FFFFFFF3FFE7FFCFFF9C7F38FE71FCE3F87FF0FFE1FFC3FF87FF0E0E1C1F",
-                            "obstacle": "00000100001C80000000001C0000080000060001C00000080000",
-                            "arrows": "(6, 5, D),(3, 9, R),(1, 15, D),(7, 19, L),(14, 14, U)",
-                            "robotCenter": "(1, 1)",
-                            "robotHead": "(2, 1)"
-                            }
-                           */
-
-                            JSONObject obj = new JSONObject();
-                            try{
-                                obj.put("map", "FFC07F80FF01FE03FFFFFFF3FFE7FFCFFF9C7F38FE71FCE3F87FF0FFE1FFC3FF87FF0E0E1C1F");
-                                obj.put("obstacle", "00000100001C80000000001C0000080000060001C00000080000");
-                                obj.put("arrows", "(6, 5, D),(3, 9, R),(1, 15, D),(7, 19, L),(14, 14, U)");
-                                obj.put("robotCenter", "(1, 1)");
-                                obj.put("robotHead", "(2, 1)");
-                            }
-                            catch (JSONException e){
-                                Log.d(TAG, "onInputEvent: "+ e);
-                            }
-                            //TODO: call processJSONDescriptorString function when receiving obj (JSONObject) from RPi to update the map
-                            descriptorStringController.processJSONDescriptorString(obj, robot);
-
                             break;
                         case DirectionView.DIRECTION_RIGHT:
                             movementController.turnRight(robot);
+                            MainActivity.sendMessage("right");
                             break;
 
                         case DirectionView.DIRECTION_LEFT:
                             movementController.turnLeft(robot);
+                            MainActivity.sendMessage("left");
                             break;
                         case DirectionView.DIRECTION_UP: //move forward
                             movementController.moveForward(robot);
+                            MainActivity.sendMessage("forward");
+
                             break;
                     }
                 }
@@ -296,8 +276,12 @@ public class RobotFragment extends Fragment implements Observer {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(fragmentBelongActivity, "Manual Update", Toast.LENGTH_SHORT).show();
-                //TODO: implement manual updating
+                try{
+                    descriptorStringController.processJSONDescriptorString(latestGridAction.getJSONObject("robot"), robot);
+                }
+                catch (JSONException e){
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -308,11 +292,12 @@ public class RobotFragment extends Fragment implements Observer {
                     fab.setVisibility(View.GONE);
                     fab.setActivated(false);
                     Toast.makeText(fragmentBelongActivity, "Auto updating", Toast.LENGTH_SHORT).show();
-                    //TODO: implement auto updating
+                    autoUpdate = true;
                 }
                 else{
                     fab.setVisibility(View.VISIBLE);
                     fab.setActivated(true);
+                    autoUpdate = false;
                 }
             }
         });
@@ -394,54 +379,61 @@ public class RobotFragment extends Fragment implements Observer {
             JSONObject msg = new JSONObject(bluetoothMessage.getMessage());
 
             if(msg != null) {
-                if (msg.getString("message") != null && msg.getString("message").length() > 0) {
-                    // To identify the message (JSON Format)
-                    // { "message": "<message>" }
-                    statusTextView.setText(msg.getString("message"));
-                } else if (msg.getJSONObject("arrow") != null) {
-                /* To identify the arrows (JSON Format)
-                { "arrow":
-                    {
-                        "x": 10,
-                        "y": 10,
-                        "direction": "left",
-                        "from": "down"
+                try {
+                    if (msg.getString("message") != null && msg.getString("message").length() > 0) {
+                        // To identify the message (JSON Format)
+                        // { "message": "<message>" }
+                        statusTextView.setText(msg.getString("message"));
                     }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-                */
-                    if (msg.getJSONObject("arrow").getString("direction").equals("up")) {
-                        imageAdapter.mThumbIds[Math.abs(19 - msg.getJSONObject("arrow").getInt("y")) * 15 + msg.getJSONObject("arrow").getInt("x")] = 3;
 
-                    } else if (msg.getJSONObject("arrow").getString("direction").equals("down")) {
-                        imageAdapter.mThumbIds[Math.abs(19 - msg.getJSONObject("arrow").getInt("y")) * 15 + msg.getJSONObject("arrow").getInt("x")] = 4;
-
-                    } else if (msg.getJSONObject("arrow").getString("direction").equals("left")) {
-                        imageAdapter.mThumbIds[Math.abs(19 - msg.getJSONObject("arrow").getInt("y")) * 15 + msg.getJSONObject("arrow").getInt("x")] = 5;
-
-                    } else if (msg.getJSONObject("arrow").getString("direction").equals("right")) {
-                        imageAdapter.mThumbIds[Math.abs(19 - msg.getJSONObject("arrow").getInt("y")) * 15 + msg.getJSONObject("arrow").getInt("x")] = 6;
-
-                    }
-                    imageAdapter.notifyDataSetChanged();
-                } else if (msg.getString("status") != null && msg.getString("status").length() > 0) {
-                    if (robot.isHeadPosition() && robot.isBodyPosition() && robot.isWaypoint()) {
-                        try {
-                            statusTextView.setText(msg.getString("status"));
-                            switch (msg.getString("status")) {
-                                case "moving right":
-                                    movementController.turnRight(robot);
-                                    break;
-                                case "moving left":
-                                    movementController.turnLeft(robot);
-                                    break;
-                                case "moving forward":
-                                    movementController.moveForward(robot);
-                                    break;
+                try {
+                 /* Format of the string to retrieve from Rpi
+                        { "robot":
+                            {
+                                "map": "FFC07F80FF01FE03FFFFFFF3FFE7FFCFFF9C7F38FE71FCE3F87FF0FFE1FFC3FF87FF0E0E1C1F",
+                                "obstacle": "00000100001C80000000001C0000080000060001C00000080000",
+                                "arrows": "(6, 5, D),(3, 9, R),(1, 15, D),(7, 19, L),(14, 14, U)",
+                                "robotCenter": "(1, 1)",
+                                "robotHead": "(2, 1)"
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                        }
+                       */
+                    if (msg.getString("robot") != null && msg.getString("robot").length() > 0) {
+                        latestGridAction = msg;
+                        if (autoUpdate) {
+                            descriptorStringController.processJSONDescriptorString(msg.getJSONObject("robot"), robot);
                         }
                     }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    if (msg.getString("action") != null && msg.getString("action").length() > 0) {
+                        if (robot.isHeadPosition() && robot.isBodyPosition()) {
+                            try {
+                                statusTextView.setText(msg.getString("action"));
+                                switch (msg.getString("action")) {
+                                    case "right":
+                                        movementController.turnRight(robot);
+                                        break;
+                                    case "left":
+                                        movementController.turnLeft(robot);
+                                        break;
+                                    case "forward":
+                                        movementController.moveForward(robot);
+                                        break;
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
             }
         } catch (JSONException e) {

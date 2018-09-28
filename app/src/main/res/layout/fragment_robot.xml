@@ -101,7 +101,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:backgroundTint="@color/colorAccent"
-                    app:srcCompat="@drawable/ic_refresh_icon" />
+                    app:srcCompat="@drawable/ic_refresh_icon"
+                    android:visibility="gone"/>
 
             </LinearLayout>
         </RelativeLayout>
@@ -118,21 +119,21 @@
                 android:gravity="center"
                 android:layout_above="@id/statusTextView">
 
-                <!--<GridView
+                <GridView
                     android:id="@+id/gridview"
                     android:layout_width="330dp"
                     android:layout_height="440dp"
                     android:paddingTop="32dp"
                     android:numColumns="15"
-                    android:scrollbars="none" />-->
-
-                <GridView
-                    android:id="@+id/gridview"
-                    android:layout_width="210dp"
-                    android:layout_height="280dp"
-                    android:paddingTop="32dp"
-                    android:numColumns="15"
                     android:scrollbars="none" />
+
+                <!--<GridView-->
+                    <!--android:id="@+id/gridview"-->
+                    <!--android:layout_width="210dp"-->
+                    <!--android:layout_height="280dp"-->
+                    <!--android:paddingTop="32dp"-->
+                    <!--android:numColumns="15"-->
+                    <!--android:scrollbars="none" />-->
 
             </LinearLayout>
 
@@ -159,17 +160,19 @@
                 android:orientation="vertical">
 
                 <Switch
-                    android:id="@+id/switchMovement"
+                    android:id="@+id/switchNavigation"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Auto Movement" />
+                    android:text="Auto Navigate"
+                    android:checked="false" />
 
 
                 <Switch
                     android:id="@+id/switchUpdate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Auto Update" />
+                    android:text="Auto Update"
+                    android:checked="true" />
 
             </LinearLayout>
 
