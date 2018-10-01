@@ -2,6 +2,10 @@ package shadowbotz.shadowbotz.View;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -35,6 +39,8 @@ import shadowbotz.shadowbotz.Model.Robot;
 import shadowbotz.shadowbotz.Model.BluetoothMessage;
 import shadowbotz.shadowbotz.R;
 
+import static android.content.Context.SENSOR_SERVICE;
+
 public class RobotFragment extends Fragment implements Observer {
 
 
@@ -53,7 +59,7 @@ public class RobotFragment extends Fragment implements Observer {
     private boolean autoUpdate=true;
     private boolean canSetWayPoint = false;
     private boolean canSetRobot = false;
-    private boolean canSendCoords = false;
+    private boolean rotateSensorOn = true; //change to false to deactivate
 
     private JSONObject latestGridAction;
 
@@ -100,6 +106,52 @@ public class RobotFragment extends Fragment implements Observer {
         imageAdapter = new ImageAdapter(fragmentBelongActivity);
 
         movementController = new MovementController(imageAdapter, getActivity());
+
+        SensorManager sensorManager = (SensorManager) getActivity().getSystemService(SENSOR_SERVICE);
+        Sensor rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+
+        SensorEventListener  rvListener = new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent sensorEvent) {
+                if(rotateSensorOn && robot.isHeadPosition() && robot.isBodyPosition()){
+                    float[] rotationMatrix = new float[16];
+                    SensorManager.getRotationMatrixFromVector(
+                            rotationMatrix, sensorEvent.values);
+
+                    // Remap coordinate system
+                    float[] remappedRotationMatrix = new float[16];
+                    SensorManager.remapCoordinateSystem(rotationMatrix,
+                            SensorManager.AXIS_X,
+                            SensorManager.AXIS_Z,
+                            remappedRotationMatrix);
+
+                    // Convert to orientations
+                    float[] orientations = new float[3];
+                    SensorManager.getOrientation(remappedRotationMatrix, orientations);
+
+                    for(int i = 0; i < 3; i++) {
+                        orientations[i] = (float)(Math.toDegrees(orientations[i]));
+                    }
+
+                    if(orientations[2] > -70) {
+                        movementController.turnRight(robot);
+                        MainActivity.sendMessage("right");
+                    } else if(orientations[2] < -110) {
+                        movementController.turnLeft(robot);
+                        MainActivity.sendMessage("left");
+                    }
+                }
+
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int i) {
+            }
+        };
+
+// Register it
+        sensorManager.registerListener(rvListener,
+                rotationVectorSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
         //for onCreateOptionsMenu
         setHasOptionsMenu(true);
@@ -261,7 +313,6 @@ public class RobotFragment extends Fragment implements Observer {
                         case DirectionView.DIRECTION_UP: //move forward
                             movementController.moveForward(robot);
                             MainActivity.sendMessage("forward");
-
                             break;
                     }
                 }
@@ -445,5 +496,4 @@ public class RobotFragment extends Fragment implements Observer {
     public void setSubject(Subject sub) {
         this.topic = sub;
     }
-
 }
