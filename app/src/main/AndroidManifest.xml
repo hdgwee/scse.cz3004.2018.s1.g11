@@ -26,16 +26,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".View.Bluetooth.BluetoothActivity"
-            android:label="@string/title_activity_bluetooth_log"
-            android:screenOrientation="landscape"
-            android:theme="@style/Theme.AppCompat" />
+
         <activity
             android:name=".View.Bluetooth.DeviceListActivity"
             android:label="@string/title_activity_bluetooth_pairing"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat" />
+
+        <activity android:name=".View.Bluetooth.BluetoothLogActivity"
+            android:label="@string/title_activity_bluetooth_log"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.AppCompat.Dialog"
+            android:excludeFromRecents="true" />
     </application>
 
 </manifest>

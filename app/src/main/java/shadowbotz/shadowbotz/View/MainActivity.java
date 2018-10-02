@@ -14,8 +14,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
@@ -23,9 +21,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.Toast;
 
 import java.util.Calendar;
@@ -40,7 +36,7 @@ import shadowbotz.shadowbotz.Controller.PersistentController;
 import shadowbotz.shadowbotz.Model.BluetoothMessage;
 import shadowbotz.shadowbotz.R;
 import shadowbotz.shadowbotz.Service.BluetoothMessagingService;
-import shadowbotz.shadowbotz.View.Bluetooth.BluetoothActivity;
+import shadowbotz.shadowbotz.View.Bluetooth.BluetoothLogActivity;
 import shadowbotz.shadowbotz.View.Bluetooth.DeviceListActivity;
 
 @SuppressLint("HardwareIds")
@@ -213,6 +209,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (bluetoothMessagingService != null) {
+            Log.e("BtMsgSvr", "bluetoothMessagingService.stop()");
             bluetoothMessagingService.stop();
         }
     }
@@ -258,22 +255,24 @@ public class MainActivity extends AppCompatActivity {
 
         if (id == R.id.secure_connect_scan) {
             // Launch the DeviceListActivity to see devices and do scan
-            bluetoothMessagingService.stop();
+            // bluetoothMessagingService.stop();
             Intent serverIntent = new Intent(this, DeviceListActivity.class);
             startActivityForResult(serverIntent, Config.REQUEST_CONNECT_DEVICE_SECURE);
+            return true;
+        } else if (id == R.id.discoverable) {
+            // Ensure this device is discoverable by others
+            BluetoothController.turnOnDiscoverable(this);
             return true;
         } else if (id == R.id.persistent_storage) {
             // Open persistent string dialog for user input
             PersistentController.f1AndF2Dialog(this);
             return true;
         } else if (id == R.id.action_bluetooth_log) {
-            Intent intent = new Intent(getApplicationContext(), BluetoothActivity.class);
+            Intent intent = new Intent(getApplicationContext(), BluetoothLogActivity.class);
             startActivity(intent);
             return true;
-        } else if (id == R.id.discoverable) {
-            // Ensure this device is discoverable by others
-            BluetoothController.turnOnDiscoverable(this);
-            return true;
+        } else if (id == R.id.action_toggle_competitive_mode) {
+
         }
 
         return super.onOptionsItemSelected(item);

@@ -19,7 +19,7 @@ import shadowbotz.shadowbotz.R;
 public class BluetoothMessageAdapter extends RecyclerView.Adapter<BluetoothMessageAdapter.ChatViewHolder> {
 
     private String currentDeviceAddress = "";
-    private ArrayList<BluetoothMessage> BluetoothMessageList = new ArrayList<>();
+    private ArrayList<BluetoothMessage> BluetoothMessageList;
 
     private LayoutInflater mInflater;
     private ListViewListener mListViewListener;
@@ -84,10 +84,10 @@ public class BluetoothMessageAdapter extends RecyclerView.Adapter<BluetoothMessa
 
             itemView.setOnClickListener(this);
 
-            textViewSender = (TextView) itemView.findViewById(R.id.textViewSender);
-            textViewMessage = (TextView) itemView.findViewById(R.id.textViewMessage);
-            textViewTime = (TextView) itemView.findViewById(R.id.textViewTime);
-            layoutForMessage = (LinearLayout) itemView.findViewById(R.id.layoutForMessage);
+            textViewSender = itemView.findViewById(R.id.textViewSender);
+            textViewMessage = itemView.findViewById(R.id.textViewMessage);
+            textViewTime = itemView.findViewById(R.id.textViewTime);
+            layoutForMessage = itemView.findViewById(R.id.layoutForMessage);
 
             mListViewListener = listViewListener;
         }

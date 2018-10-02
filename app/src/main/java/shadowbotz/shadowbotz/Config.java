@@ -36,4 +36,12 @@ public class Config {
 
     public static String my_bluetooth_device_name = "";
     public static String my_bluetooth_device_address = "";
+
+    public static String arduino_move_forward_command = "sf";
+    public static String arduino_turn_left_command = "sl";
+    public static String arduino_turn_right_command= "sr";
+
+    public static String algorithm_start_fastest_path = "asf";
+    public static String algorithm_start_exploration = "ase";
+    public static String algorithm_stop= "astop";
 }

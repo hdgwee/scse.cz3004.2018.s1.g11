@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -8,16 +7,15 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="8dp"
         android:orientation="horizontal"
-        android:weightSum="1">
+        android:padding="4dp"
+        android:weightSum="1"
+        android:baselineAligned="false">
 
         <RelativeLayout
             android:id="@+id/leftColumn"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
             android:layout_weight="0.3">
 
             <LinearLayout
@@ -89,6 +87,22 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
+                <TextView
+                    android:text="Message:"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/statusTextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                </ScrollView>
+
             </LinearLayout>
 
             <LinearLayout
@@ -113,38 +127,17 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:orientation="vertical"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:gravity="center"
             android:layout_weight="0.4">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:layout_above="@id/statusTextView">
-
-                <GridView
-                    android:id="@+id/gridview"
-                    android:layout_width="330dp"
-                    android:layout_height="440dp"
-                    android:paddingTop="32dp"
-                    android:numColumns="15"
-                    android:scrollbars="none" />
-
-                <!--<GridView-->
-                    <!--android:id="@+id/gridview"-->
-                    <!--android:layout_width="210dp"-->
-                    <!--android:layout_height="280dp"-->
-                    <!--android:paddingTop="32dp"-->
-                    <!--android:numColumns="15"-->
-                    <!--android:scrollbars="none" />-->
-
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/statusTextView"
+            <GridView
+                android:id="@+id/gridview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:layout_alignParentBottom="true" />
+                android:numColumns="15"
+                android:scrollbars="none" />
 
         </RelativeLayout>
 
@@ -152,8 +145,6 @@
             android:id="@+id/rightColumn"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
             android:orientation="vertical"
             android:visibility="gone"
             android:layout_weight="0.3">
@@ -161,6 +152,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingStart="4dp"
                 android:orientation="vertical">
 
                 <Switch
@@ -168,14 +160,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Rotate By Sensor"
-                    android:checked="false" />
+                    android:checked="false"
+                    android:visibility="gone" />
 
                 <Switch
                     android:id="@+id/switchNavigation"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Auto Navigate"
-                    android:checked="true" />
+                    android:checked="true"
+                    android:visibility="gone" />
 
                 <Switch
                     android:id="@+id/switchUpdate"
@@ -187,12 +181,12 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/linearLayoutforL1L2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
-                android:weightSum="1">
+                android:weightSum="1"
+                android:visibility="gone">
 
                 <Button
                     android:id="@+id/buttonL1"
@@ -215,7 +209,7 @@
                 android:id="@+id/linearLayoutForDirectionalPad"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="64dp"
+                android:paddingTop="32dp"
                 android:gravity="center"
                 android:visibility="gone">
 
@@ -229,7 +223,7 @@
             <LinearLayout
                 android:id="@+id/linearLayoutForAutoNavigate"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:orientation="vertical">
 
                 <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
@@ -254,7 +248,7 @@
                     android:id="@+id/buttonStart"
                     android:background="@drawable/button_ghost"
                     android:layout_width="match_parent"
-                    android:layout_height="160dp"
+                    android:layout_height="wrap_content"
                     android:enabled="false"
                     android:text="@string/start" />
 
@@ -262,7 +256,7 @@
                     android:id="@+id/buttonStop"
                     android:background="@drawable/button_ghost"
                     android:layout_width="match_parent"
-                    android:layout_height="160dp"
+                    android:layout_height="wrap_content"
                     android:visibility="gone"
                     android:text="@string/stop" />
 
@@ -272,4 +266,4 @@
 
     </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>

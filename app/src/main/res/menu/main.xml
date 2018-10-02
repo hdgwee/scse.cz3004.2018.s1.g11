@@ -27,6 +27,11 @@
         android:title="@string/action_bluetooth_log"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_toggle_competitive_mode"
+        android:title="@string/action_toggle_competitive_mode"
+        app:showAsAction="never" />
+
     <!--<item
         android:id="@+id/action_settings"
         android:title="@string/action_settings"

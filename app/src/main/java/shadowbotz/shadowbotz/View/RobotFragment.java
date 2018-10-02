@@ -11,6 +11,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -53,8 +54,8 @@ public class RobotFragment extends Fragment implements Observer {
     private TextView statusTextView;
     private ImageAdapter imageAdapter;
 
-    private Button setWaypoint;
-    private Button setRobot;
+    private Button buttonSetWaypoint;
+    private Button buttonSetRobot;
     private Button buttonSendCoords;
 
     private boolean autoUpdate=true;
@@ -70,6 +71,13 @@ public class RobotFragment extends Fragment implements Observer {
 
     private DescriptorStringController descriptorStringController;
 
+    private TextView textviewRobotBody;
+    private TextView textviewRobotHead;
+    private Switch switchRotateBySensor;
+    private Switch switchNavigation;
+    private LinearLayout linearLayoutForL1L2;
+
+    private boolean competitiveMode = true;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -85,14 +93,14 @@ public class RobotFragment extends Fragment implements Observer {
         final SharedPreferences sharedPreferences = fragmentBelongActivity.getSharedPreferences(Config.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         final DirectionView directionView = view.findViewById(R.id.viewDirection);
 
-        final Switch switchMovement = view.findViewById(R.id.switchNavigation);
+        switchNavigation = view.findViewById(R.id.switchNavigation);
         final Switch switchUpdate = view.findViewById(R.id.switchUpdate);
 
         final Button buttonStart = view.findViewById(R.id.buttonStart);
         final Button buttonStop = view.findViewById(R.id.buttonStop);
 
-        final TextView textviewRobotBody = view.findViewById(R.id.textview_robot_body);
-        final TextView textviewRobotHead = view.findViewById(R.id.textview_robot_head);
+        textviewRobotBody = view.findViewById(R.id.textview_robot_body);
+        textviewRobotHead = view.findViewById(R.id.textview_robot_head);
         final TextView textviewWaypoint = view.findViewById(R.id.textview_waypoint);
 
         final RadioButton radioExploration = view.findViewById(R.id.radioExploration);
@@ -101,7 +109,8 @@ public class RobotFragment extends Fragment implements Observer {
         final RelativeLayout leftColumn = view.findViewById(R.id.leftColumn);
         final LinearLayout rightColumn = view.findViewById(R.id.rightColumn);
 
-        final Switch switchRotateBySensor = view.findViewById(R.id.switchRotateBySensor);
+        switchRotateBySensor = view.findViewById(R.id.switchRotateBySensor);
+        linearLayoutForL1L2 = view.findViewById(R.id.linearLayoutforL1L2);
 
         switchRotateBySensor.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -110,15 +119,15 @@ public class RobotFragment extends Fragment implements Observer {
             }
         });
 
-        setWaypoint = view.findViewById(R.id.button_way_point);
-        setRobot = view.findViewById(R.id.button_robot_position);
+        buttonSetWaypoint = view.findViewById(R.id.button_way_point);
+        buttonSetRobot = view.findViewById(R.id.button_robot_position);
         buttonSendCoords = view.findViewById(R.id.button_send_coords);
         buttonSendCoords.setEnabled(false);
 
         statusTextView = view.findViewById(R.id.statusTextView);
 
-        Button buttonL1 = view.findViewById(R.id.buttonL1);
-        Button buttonL2 = view.findViewById(R.id.buttonL2);
+        final Button buttonL1 = view.findViewById(R.id.buttonL1);
+        final Button buttonL2 = view.findViewById(R.id.buttonL2);
 
         imageAdapter = new ImageAdapter(fragmentBelongActivity);
 
@@ -181,7 +190,6 @@ public class RobotFragment extends Fragment implements Observer {
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() { //set robot body and head
             public void onItemClick(AdapterView<?> parent, View v,
                                     int position, long id) {
-
                 if(canSetRobot){
                     if((position%15>=1 && position%15<=13) && Math.abs(19-(Math.abs(position/15))) >=1 && Math.abs(19-(Math.abs(position/15))) <=18){
                         if(!robot.isBodyPosition()){
@@ -201,7 +209,7 @@ public class RobotFragment extends Fragment implements Observer {
                                 // MainActivity.sendMessage("Way point: " +robot.getHead()%15 +", "+ Math.abs(19-(Math.abs(position/15))));
 
                                 canSetRobot = false;
-                                setWaypoint.setEnabled(true);
+                                buttonSetWaypoint.setEnabled(true);
                                 buttonSendCoords.setEnabled(true);
 
                                 leftColumn.setVisibility(View.VISIBLE);
@@ -211,21 +219,21 @@ public class RobotFragment extends Fragment implements Observer {
                                 textviewRobotHead.setText(output);
                             }
                             else{
-                                Toast.makeText(fragmentBelongActivity, "Invalid head position", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(fragmentBelongActivity, "Invalid position for head!", Toast.LENGTH_SHORT).show();
                             }
                         }
                         else{
-                            Toast.makeText(fragmentBelongActivity, "Robot Position Set!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(fragmentBelongActivity, "Position of the robot has been not set!", Toast.LENGTH_SHORT).show();
                         }
                         imageAdapter.notifyDataSetChanged();
 
                     }
                     else{
-                        Toast.makeText(fragmentBelongActivity, "Out of Range!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(fragmentBelongActivity, "Out of range!", Toast.LENGTH_SHORT).show();
                     }
                 }
                 else{
-                    Toast.makeText(fragmentBelongActivity, "Please press set robot button", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(fragmentBelongActivity, "Please click set robot button", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -240,7 +248,7 @@ public class RobotFragment extends Fragment implements Observer {
                     movementController.setWayPoint(robot, statusTextView);
                     robot.setWaypoint(true);
                     canSetWayPoint = false;
-                    setRobot.setEnabled(true);
+                    buttonSetRobot.setEnabled(true);
 
                     leftColumn.setVisibility(View.VISIBLE);
                     rightColumn.setVisibility(View.VISIBLE);
@@ -249,13 +257,13 @@ public class RobotFragment extends Fragment implements Observer {
                     textviewWaypoint.setText(output);
                 }
                 else{
-                    Toast.makeText(fragmentBelongActivity, "Please press set waypoint button", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(fragmentBelongActivity, "Please click set waypoint button!", Toast.LENGTH_SHORT).show();
                 }
                 return true;
             }
         });
 
-        setWaypoint.setOnClickListener(new View.OnClickListener() {
+        buttonSetWaypoint.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(robot.isWaypoint()){
@@ -263,13 +271,13 @@ public class RobotFragment extends Fragment implements Observer {
                 }
                 canSetWayPoint = true;
                 robot.setWaypoint(false);
-                setRobot.setEnabled(false);
+                buttonSetRobot.setEnabled(false);
                 leftColumn.setVisibility(View.INVISIBLE);
                 rightColumn.setVisibility(View.INVISIBLE);
             }
         });
 
-        setRobot.setOnClickListener(new View.OnClickListener() {
+        buttonSetRobot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (robot.isBodyPosition()){
@@ -278,7 +286,7 @@ public class RobotFragment extends Fragment implements Observer {
                 canSetRobot = true;
                 robot.setHeadPosition(false);
                 robot.setBodyPosition(false);
-                setWaypoint.setEnabled(false);
+                buttonSetWaypoint.setEnabled(false);
                 leftColumn.setVisibility(View.INVISIBLE);
                 rightColumn.setVisibility(View.INVISIBLE);
             }
@@ -339,7 +347,7 @@ public class RobotFragment extends Fragment implements Observer {
                     }
                 }
                 else{
-                    Toast.makeText(fragmentBelongActivity, "Robot not set!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(fragmentBelongActivity, "Robot has not been set!", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -349,11 +357,12 @@ public class RobotFragment extends Fragment implements Observer {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try{
-                    descriptorStringController.processJSONDescriptorString(latestGridAction.getJSONObject("robot"), robot);
-                }
-                catch (JSONException e){
-                    e.printStackTrace();
+                if(latestGridAction != null) {
+                    try {
+                        descriptorStringController.processJSONDescriptorString(latestGridAction.getJSONObject("robot"), robot);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -374,7 +383,7 @@ public class RobotFragment extends Fragment implements Observer {
             }
         });
 
-        switchMovement.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        switchNavigation.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if(b){ // if auto
@@ -398,50 +407,95 @@ public class RobotFragment extends Fragment implements Observer {
         buttonStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO: implement start function
                 buttonStart.setVisibility(View.GONE);
                 buttonStop.setVisibility(View.VISIBLE);
 
                 if(radioExploration.isChecked()) {
-                    MainActivity.sendMessage("{ \"action\": \"start_auto_navigate_exploration\" }");
+                    MainActivity.sendMessage(Config.algorithm_start_exploration);
                 }
                 else if(radioFastestPath.isChecked()){
-                    MainActivity.sendMessage("{ \"action\": \"start_auto_navigate_fastest_path\" }");
+                    MainActivity.sendMessage(Config.algorithm_start_fastest_path);
                 }
 
+                radioExploration.setEnabled(false);
+                radioFastestPath.setEnabled(false);
+                switchNavigation.setEnabled(false);
+                buttonSetWaypoint.setEnabled(false);
+                buttonSetRobot.setEnabled(false);
                 buttonSendCoords.setEnabled(false);
+                buttonL1.setEnabled(false);
+                buttonL2.setEnabled(false);
             }
         });
 
         buttonStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO: implement stop function
+                Toast.makeText(fragmentBelongActivity, "Please hold Stop button to terminate Auto Navigation!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        buttonStop.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
                 buttonStart.setVisibility(View.VISIBLE);
                 buttonStop.setVisibility(View.GONE);
-                MainActivity.sendMessage("{ \"action\": \"stop_auto_navigate\" }");
 
+                MainActivity.sendMessage(Config.algorithm_stop);
+
+                radioExploration.setEnabled(true);
+                radioFastestPath.setEnabled(true);
+                switchNavigation.setEnabled(true);
+                buttonSetWaypoint.setEnabled(true);
+                buttonSetRobot.setEnabled(true);
                 buttonSendCoords.setEnabled(true);
+                buttonL1.setEnabled(true);
+                buttonL2.setEnabled(true);
+                return false;
             }
         });
 
         buttonL1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MainActivity.sendMessage(sharedPreferences.getString(Config.F1_BUTTON, ""));
-                Toast.makeText(fragmentBelongActivity, sharedPreferences.getString(Config.F1_BUTTON, ""), Toast.LENGTH_SHORT).show();
+                String output = sharedPreferences.getString(Config.F1_BUTTON, "");
+                MainActivity.sendMessage(output);
+                Toast.makeText(fragmentBelongActivity, output, Toast.LENGTH_SHORT).show();
             }
         });
 
         buttonL2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MainActivity.sendMessage(sharedPreferences.getString(Config.F2_BUTTON, ""));
-                Toast.makeText(fragmentBelongActivity, sharedPreferences.getString(Config.F2_BUTTON, ""), Toast.LENGTH_SHORT).show();
+                String output = sharedPreferences.getString(Config.F2_BUTTON, "");
+                MainActivity.sendMessage(output);
+                Toast.makeText(fragmentBelongActivity, output, Toast.LENGTH_SHORT).show();
             }
         });
 
         return view;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_toggle_competitive_mode) {
+            if(competitiveMode) {
+                switchRotateBySensor.setVisibility(View.VISIBLE);
+                switchNavigation.setVisibility(View.VISIBLE);
+                linearLayoutForL1L2.setVisibility(View.VISIBLE);
+            }
+            else {
+                switchRotateBySensor.setVisibility(View.GONE);
+                switchNavigation.setVisibility(View.GONE);
+                linearLayoutForL1L2.setVisibility(View.GONE);
+            }
+
+            competitiveMode = !competitiveMode;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -478,6 +532,8 @@ public class RobotFragment extends Fragment implements Observer {
                         latestGridAction = msg;
                         if (autoUpdate) {
                             descriptorStringController.processJSONDescriptorString(msg.getJSONObject("robot"), robot);
+
+                            updateHeadBodyCoordinates();
                         }
                     }
                 } catch (JSONException e) {
@@ -500,6 +556,7 @@ public class RobotFragment extends Fragment implements Observer {
                                         movementController.moveForward(robot);
                                         break;
                                 }
+                                updateHeadBodyCoordinates();
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -534,17 +591,21 @@ public class RobotFragment extends Fragment implements Observer {
                                 switch (directionOfAction) {
                                     case ("left"):
                                         movementController.turnLeft(robot);
+                                        MainActivity.sendMessage(Config.arduino_turn_left_command);
                                         break;
                                     case ("right"):
                                         movementController.turnRight(robot);
+                                        MainActivity.sendMessage(Config.arduino_turn_right_command);
                                         break;
                                     case ("forward"):
                                         movementController.moveForward(robot);
+                                        MainActivity.sendMessage(Config.arduino_move_forward_command);
                                         break;
                                     default:
                                         break;
                                 }
-                                MainActivity.sendMessage(directionOfAction);
+
+                                updateHeadBodyCoordinates();
                             }
                         });
 
@@ -557,6 +618,16 @@ public class RobotFragment extends Fragment implements Observer {
                 }
             };
             threadToSendAction.start();
+        }
+    }
+
+    private void updateHeadBodyCoordinates() {
+        if(textviewRobotHead != null && textviewRobotBody != null){
+            String robotHead = robot.getHead() % 15 + "," + Math.abs(19 - (Math.abs(robot.getHead() / 15)));
+            String robotBody = robot.getBody() % 15 + "," + Math.abs(19 - (Math.abs(robot.getBody() / 15)));
+
+            textviewRobotHead.setText(robotHead);
+            textviewRobotBody.setText(robotBody);
         }
     }
 }

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name">shadowbotz</string>
     <string name="action_bluetooth_log">Bluetooth Log</string>
     <string name="action_settings">Settings</string>
+    <string name="action_toggle_competitive_mode">Toggle Competitive Mode</string>
+    <string name="app_name">shadowbotz</string>
     <string name="bluetooth_discoverable">Enable Discovery</string>
     <string name="bluetooth_nearby_devices">Nearby Devices</string>
     <string name="bluetooth_none_found">No devices found</string>
