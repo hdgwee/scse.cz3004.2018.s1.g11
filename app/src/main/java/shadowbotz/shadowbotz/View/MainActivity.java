@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
@@ -24,6 +25,8 @@ import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.Calendar;
 import java.util.Set;
 import java.util.UUID;
@@ -328,6 +331,8 @@ public class MainActivity extends AppCompatActivity {
                 Config.sent_message = writeMessage;
 
                 MainActivity.bluetoothSubject.postMessage(bluetoothMessage);
+
+                writeToTextFile(writeMessage);
             } else if (msg.what == Config.MESSAGE_READ) {
                 // Receive a message to connected bluetooth device
                 byte[] readBuf = (byte[]) msg.obj;
@@ -347,6 +352,8 @@ public class MainActivity extends AppCompatActivity {
                 Config.received_message = readMessage;
 
                 MainActivity.bluetoothSubject.postMessage(bluetoothMessage);
+
+                writeToTextFile(readMessage);
             } else if (msg.what == Config.MESSAGE_DEVICE_NAME) {
                 // msg.getData().getString(Config.DEVICE_NAME)
             } else if (msg.what == Config.MESSAGE_TOAST) {
@@ -398,6 +405,27 @@ public class MainActivity extends AppCompatActivity {
                 byte[] send = message.getBytes();
                 bluetoothMessagingService.write(send);
             }
+        }
+    }
+
+    private void writeToTextFile(String content) {
+        FileOutputStream outputStream;
+
+        try {
+            File file = new File(Environment.getExternalStorageDirectory(), "/shadowbotz_log.txt");
+
+            if(!file.exists()) {
+                outputStream = new FileOutputStream(file, true);
+                outputStream.write(content.getBytes());
+                outputStream.close();
+            }
+            else {
+                outputStream = new FileOutputStream(file, true);
+                outputStream.write(("\n" + content).getBytes());
+                outputStream.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

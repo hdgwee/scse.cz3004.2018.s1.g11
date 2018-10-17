@@ -297,26 +297,28 @@ public class RobotFragment extends Fragment implements Observer {
             public void onClick(View view) {
                 JSONObject data = new JSONObject();
 
-                try {
-                    data.put("robot_head_x", robot.getHead()%15);
-                    data.put("robot_head_y", Math.abs(19-(Math.abs(robot.getHead()/15))));
-                    data.put("robot_body_x", robot.getBody()%15);
-                    data.put("robot_body_y", Math.abs(19-(Math.abs(robot.getBody()/15))));
-                    data.put("waypoint_x", robot.getWaypointPosition()%15);
-                    data.put("waypoint_y", Math.abs(19-(Math.abs(robot.getWaypointPosition()/15))));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                // try {
+                //     data.put("robot_head_x", robot.getHead()%15);
+                //     data.put("robot_head_y", Math.abs(19-(Math.abs(robot.getHead()/15))));
+                //     data.put("robot_body_x", robot.getBody()%15);
+                //     data.put("robot_body_y", Math.abs(19-(Math.abs(robot.getBody()/15))));
+                //     data.put("waypoint_x", robot.getWaypointPosition()%15);
+                //     data.put("waypoint_y", Math.abs(19-(Math.abs(robot.getWaypointPosition()/15))));
+                // } catch (JSONException e) {
+                //     e.printStackTrace();
+                // }
+                //
+                // JSONObject jsonObject = new JSONObject();
+                //
+                // try {
+                //     jsonObject.put("coordinate", data);
+                // } catch (JSONException e) {
+                //     e.printStackTrace();
+                // }
+                //
+                // MainActivity.sendMessage(jsonObject.toString());
 
-                JSONObject jsonObject = new JSONObject();
-
-                try {
-                    jsonObject.put("coordinate", data);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-                MainActivity.sendMessage(jsonObject.toString());
+                MainActivity.sendMessage("a"+robot.getWaypointPosition()%15+","+Math.abs(19-(Math.abs(robot.getWaypointPosition()/15))));
 
                 buttonStart.setEnabled(true);
                 rightColumn.setVisibility(View.VISIBLE);

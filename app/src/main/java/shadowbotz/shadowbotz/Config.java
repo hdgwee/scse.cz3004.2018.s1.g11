@@ -41,7 +41,7 @@ public class Config {
     public static String arduino_turn_left_command = "sl";
     public static String arduino_turn_right_command= "sr";
 
-    public static String algorithm_start_fastest_path = "asf";
-    public static String algorithm_start_exploration = "ase";
+    public static String algorithm_start_fastest_path = "afps";
+    public static String algorithm_start_exploration = "aexs";
     public static String algorithm_stop= "astop";
 }
