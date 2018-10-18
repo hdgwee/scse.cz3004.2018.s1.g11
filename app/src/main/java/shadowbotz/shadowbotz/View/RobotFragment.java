@@ -79,6 +79,12 @@ public class RobotFragment extends Fragment implements Observer {
 
     private boolean competitiveMode = true;
 
+    private Button buttonStart;
+    private Button buttonStop;
+
+    private RadioButton radioExploration;
+    private RadioButton radioFastestPath;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_robot, container, false);
@@ -96,15 +102,15 @@ public class RobotFragment extends Fragment implements Observer {
         switchNavigation = view.findViewById(R.id.switchNavigation);
         final Switch switchUpdate = view.findViewById(R.id.switchUpdate);
 
-        final Button buttonStart = view.findViewById(R.id.buttonStart);
-        final Button buttonStop = view.findViewById(R.id.buttonStop);
+        buttonStart = view.findViewById(R.id.buttonStart);
+        buttonStop = view.findViewById(R.id.buttonStop);
+
+        radioExploration = view.findViewById(R.id.radioExploration);
+        radioFastestPath = view.findViewById(R.id.radioFastestPath);
 
         textviewRobotBody = view.findViewById(R.id.textview_robot_body);
         textviewRobotHead = view.findViewById(R.id.textview_robot_head);
         final TextView textviewWaypoint = view.findViewById(R.id.textview_waypoint);
-
-        final RadioButton radioExploration = view.findViewById(R.id.radioExploration);
-        final RadioButton radioFastestPath = view.findViewById(R.id.radioFastestPath);
 
         final RelativeLayout leftColumn = view.findViewById(R.id.leftColumn);
         final LinearLayout rightColumn = view.findViewById(R.id.rightColumn);
@@ -504,21 +510,33 @@ public class RobotFragment extends Fragment implements Observer {
     public void update() {
         BluetoothMessage bluetoothMessage = (BluetoothMessage) topic.getUpdate(this);
 
-        try {
-            JSONObject msg = new JSONObject(bluetoothMessage.getMessage());
+        if (bluetoothMessage.getMessage().equals("endesp")) {
+            buttonStart.setVisibility(View.VISIBLE);
+            buttonStop.setVisibility(View.GONE);
 
-            if(msg != null) {
-                try {
-                    if (msg.getString("message") != null && msg.getString("message").length() > 0) {
-                        // To identify the message (JSON Format)
-                        // { "message": "<message>" }
-                        statusTextView.setText(msg.getString("message"));
+            radioExploration.setEnabled(true);
+            radioFastestPath.setEnabled(true);
+            switchNavigation.setEnabled(true);
+            buttonSetWaypoint.setEnabled(true);
+            buttonSetRobot.setEnabled(true);
+            buttonSendCoords.setEnabled(true);
+        }
+        else {
+            try {
+                JSONObject msg = new JSONObject(bluetoothMessage.getMessage());
+
+                if (msg != null) {
+                    try {
+                        if (msg.getString("message") != null && msg.getString("message").length() > 0) {
+                            // To identify the message (JSON Format)
+                            // { "message": "<message>" }
+                            statusTextView.setText(msg.getString("message"));
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
 
-                try {
+                    try {
                  /* Format of the string to retrieve from Rpi
                         { "robot":
                             {
@@ -530,46 +548,47 @@ public class RobotFragment extends Fragment implements Observer {
                             }
                         }
                        */
-                    if (msg.getString("robot") != null && msg.getString("robot").length() > 0) {
-                        latestGridAction = msg;
-                        if (autoUpdate) {
-                            descriptorStringController.processJSONDescriptorString(msg.getJSONObject("robot"), robot);
+                        if (msg.getString("robot") != null && msg.getString("robot").length() > 0) {
+                            latestGridAction = msg;
+                            if (autoUpdate) {
+                                descriptorStringController.processJSONDescriptorString(msg.getJSONObject("robot"), robot);
 
-                            updateHeadBodyCoordinates();
-                        }
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-                try {
-                    if (msg.getString("action") != null && msg.getString("action").length() > 0) {
-                        if (robot.isHeadPosition() && robot.isBodyPosition()) {
-                            try {
-                                statusTextView.setText(msg.getString("action"));
-                                switch (msg.getString("action")) {
-                                    case "right":
-                                        movementController.turnRight(robot);
-                                        break;
-                                    case "left":
-                                        movementController.turnLeft(robot);
-                                        break;
-                                    case "forward":
-                                        movementController.moveForward(robot);
-                                        break;
-                                }
                                 updateHeadBodyCoordinates();
-                            } catch (Exception e) {
-                                e.printStackTrace();
                             }
                         }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
+
+                    try {
+                        if (msg.getString("action") != null && msg.getString("action").length() > 0) {
+                            if (robot.isHeadPosition() && robot.isBodyPosition()) {
+                                try {
+                                    statusTextView.setText(msg.getString("action"));
+                                    switch (msg.getString("action")) {
+                                        case "right":
+                                            movementController.turnRight(robot);
+                                            break;
+                                        case "left":
+                                            movementController.turnLeft(robot);
+                                            break;
+                                        case "forward":
+                                            movementController.moveForward(robot);
+                                            break;
+                                    }
+                                    updateHeadBodyCoordinates();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
     }
 
