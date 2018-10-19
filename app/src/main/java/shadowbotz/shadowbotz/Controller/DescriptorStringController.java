@@ -154,8 +154,6 @@ public class DescriptorStringController {
            try{
                descriptorString1(jsonObject.getString("map"));
 
-
-
                descriptorString2(jsonObject.getString("obstacle"));
 
                //testing setting of arrows

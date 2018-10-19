@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import io.realm.Realm;
+import shadowbotz.shadowbotz.Algo.model.util.SocketMgr;
 import shadowbotz.shadowbotz.BluetoothObserverSubject.BluetoothSubject;
 import shadowbotz.shadowbotz.Config;
 import shadowbotz.shadowbotz.Controller.BluetoothController;
@@ -259,8 +260,11 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.secure_connect_scan) {
             // Launch the DeviceListActivity to see devices and do scan
             // bluetoothMessagingService.stop();
-            Intent serverIntent = new Intent(this, DeviceListActivity.class);
-            startActivityForResult(serverIntent, Config.REQUEST_CONNECT_DEVICE_SECURE);
+
+            // Intent serverIntent = new Intent(this, DeviceListActivity.class);
+            // startActivityForResult(serverIntent, Config.REQUEST_CONNECT_DEVICE_SECURE);
+
+            SocketMgr.getInstance().openConnection();
             return true;
         } else if (id == R.id.discoverable) {
             // Ensure this device is discoverable by others
@@ -327,6 +331,7 @@ public class MainActivity extends AppCompatActivity {
                 bluetoothMessage.setMessage(writeMessage);
                 bluetoothMessage.setDatetime(Calendar.getInstance().getTime());
                 realm.commitTransaction();
+                realm.close();
 
                 Config.sent_message = writeMessage;
 
@@ -348,6 +353,7 @@ public class MainActivity extends AppCompatActivity {
                 bluetoothMessage.setMessage(readMessage);
                 bluetoothMessage.setDatetime(Calendar.getInstance().getTime());
                 realm.commitTransaction();
+                realm.close();
 
                 Config.received_message = readMessage;
 
@@ -425,7 +431,7 @@ public class MainActivity extends AppCompatActivity {
                 outputStream.close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("Algo", e.getMessage());
         }
     }
 }

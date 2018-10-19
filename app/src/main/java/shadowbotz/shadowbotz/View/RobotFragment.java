@@ -7,9 +7,11 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,17 +33,27 @@ import com.andretietz.android.controller.InputView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import shadowbotz.shadowbotz.Algo.model.algorithm.AlgorithmRunner;
+import shadowbotz.shadowbotz.Algo.model.algorithm.ExplorationAlgorithmRunner;
+import shadowbotz.shadowbotz.Algo.model.algorithm.FastestPathAlgorithmRunner;
+import shadowbotz.shadowbotz.Algo.model.entity.Grid;
 import shadowbotz.shadowbotz.BluetoothObserverSubject.Observer;
 import shadowbotz.shadowbotz.BluetoothObserverSubject.Subject;
 import shadowbotz.shadowbotz.Config;
 import shadowbotz.shadowbotz.Controller.DescriptorStringController;
 import shadowbotz.shadowbotz.Controller.ImageAdapter;
 import shadowbotz.shadowbotz.Controller.MovementController;
-import shadowbotz.shadowbotz.Model.Robot;
 import shadowbotz.shadowbotz.Model.BluetoothMessage;
+import shadowbotz.shadowbotz.Model.Robot;
 import shadowbotz.shadowbotz.R;
 
 import static android.content.Context.SENSOR_SERVICE;
+import static shadowbotz.shadowbotz.Algo.constant.RobotConstants.LEFT;
+import static shadowbotz.shadowbotz.Algo.constant.RobotConstants.MIDDLE;
+import static shadowbotz.shadowbotz.Algo.constant.RobotConstants.RIGHT;
 
 public class RobotFragment extends Fragment implements Observer {
 
@@ -85,9 +97,17 @@ public class RobotFragment extends Fragment implements Observer {
     private RadioButton radioExploration;
     private RadioButton radioFastestPath;
 
+    private Grid alGrid;
+    private shadowbotz.shadowbotz.Algo.model.entity.Robot alRobot;
+
+    private int waypointX, waypointY;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_robot, container, false);
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
 
         // Observer pattern
         MainActivity.bluetoothSubject.register(this);
@@ -173,7 +193,6 @@ public class RobotFragment extends Fragment implements Observer {
                         MainActivity.sendMessage("left");
                     }
                 }
-
             }
 
             @Override
@@ -311,7 +330,7 @@ public class RobotFragment extends Fragment implements Observer {
                 //     data.put("waypoint_x", robot.getWaypointPosition()%15);
                 //     data.put("waypoint_y", Math.abs(19-(Math.abs(robot.getWaypointPosition()/15))));
                 // } catch (JSONException e) {
-                //     e.printStackTrace();
+                //     Log.e("Algo", e.getMessage());
                 // }
                 //
                 // JSONObject jsonObject = new JSONObject();
@@ -319,12 +338,22 @@ public class RobotFragment extends Fragment implements Observer {
                 // try {
                 //     jsonObject.put("coordinate", data);
                 // } catch (JSONException e) {
-                //     e.printStackTrace();
+                //     Log.e("Algo", e.getMessage());
                 // }
                 //
                 // MainActivity.sendMessage(jsonObject.toString());
 
-                MainActivity.sendMessage("a"+robot.getWaypointPosition()%15+","+Math.abs(19-(Math.abs(robot.getWaypointPosition()/15))));
+                waypointX = robot.getWaypointPosition()%15;
+                waypointY = Math.abs(19-(Math.abs(robot.getWaypointPosition()/15)));
+
+                Thread t = new Thread() {
+                    public void run() {
+                        //Calibrate before starting exploration
+                        alRobot.sense1(true);
+                        alRobot.sense1(true);
+                    }
+                };
+                t.start();
 
                 buttonStart.setEnabled(true);
                 rightColumn.setVisibility(View.VISIBLE);
@@ -369,7 +398,7 @@ public class RobotFragment extends Fragment implements Observer {
                     try {
                         descriptorStringController.processJSONDescriptorString(latestGridAction.getJSONObject("robot"), robot);
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                        Log.e("Algo-123h02b1", e.getMessage());
                     }
                 }
             }
@@ -419,10 +448,29 @@ public class RobotFragment extends Fragment implements Observer {
                 buttonStop.setVisibility(View.VISIBLE);
 
                 if(radioExploration.isChecked()) {
-                    MainActivity.sendMessage(Config.algorithm_start_exploration);
+                    // do exploration
+                    Thread t = new Thread() {
+                        public void run() {
+                            AlgorithmRunner explorationRunner = new ExplorationAlgorithmRunner(1);
+                            explorationRunner.setActivity(getActivity());
+                            explorationRunner.run(alGrid, alRobot, true);
+                        }
+                    };
+                    t.start();
+
+                    // MainActivity.sendMessage(Config.algorithm_start_exploration);
                 }
                 else if(radioFastestPath.isChecked()){
-                    MainActivity.sendMessage(Config.algorithm_start_fastest_path);
+                    // do fastest path
+                    Thread t = new Thread() {
+                        public void run() {
+                            AlgorithmRunner fastestPathRunner = new FastestPathAlgorithmRunner(1,
+                                    waypointX, waypointY);
+                            fastestPathRunner.run(alGrid, alRobot, true);
+                        }
+                    };
+                    t.start();
+                    // MainActivity.sendMessage(Config.algorithm_start_fastest_path);
                 }
 
                 radioExploration.setEnabled(false);
@@ -481,6 +529,26 @@ public class RobotFragment extends Fragment implements Observer {
             }
         });
 
+        shadowbotz.shadowbotz.Algo.model.entity.Sensor sensor1 = new shadowbotz.shadowbotz.Algo.model.entity.Sensor(2, 0, 0, LEFT, 3);
+        shadowbotz.shadowbotz.Algo.model.entity.Sensor sensor2 = new shadowbotz.shadowbotz.Algo.model.entity.Sensor(2, 0, 2, LEFT, 3);
+        shadowbotz.shadowbotz.Algo.model.entity.Sensor sensor3 = new shadowbotz.shadowbotz.Algo.model.entity.Sensor(2, 0, 0, MIDDLE, 5);
+        shadowbotz.shadowbotz.Algo.model.entity.Sensor sensor4 = new shadowbotz.shadowbotz.Algo.model.entity.Sensor(2, 2, 0, MIDDLE, 5);
+        shadowbotz.shadowbotz.Algo.model.entity.Sensor sensor5 = new shadowbotz.shadowbotz.Algo.model.entity.Sensor(2, 1, 0, MIDDLE, 3);
+        shadowbotz.shadowbotz.Algo.model.entity.Sensor sensor6 = new shadowbotz.shadowbotz.Algo.model.entity.Sensor(6, 1, 0, RIGHT, 1);
+        List<shadowbotz.shadowbotz.Algo.model.entity.Sensor> sensors = new ArrayList<>();
+        sensors.add(sensor1);
+        sensors.add(sensor2);
+        sensors.add(sensor3);
+        sensors.add(sensor4);
+        sensors.add(sensor5);
+        sensors.add(sensor6);
+
+        alGrid = new Grid();
+        alRobot = new shadowbotz.shadowbotz.Algo.model.entity.Robot(alGrid, sensors);
+
+        //TODO
+        System.out.println("Calibration Done! Ready to explore");
+
         return view;
     }
 
@@ -533,7 +601,7 @@ public class RobotFragment extends Fragment implements Observer {
                             statusTextView.setText(msg.getString("message"));
                         }
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                        Log.e("Algo", e.getMessage());
                     }
 
                     try {
@@ -557,7 +625,7 @@ public class RobotFragment extends Fragment implements Observer {
                             }
                         }
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                        Log.e("Algo-a223ka", e.getMessage());
                     }
 
                     try {
@@ -578,16 +646,16 @@ public class RobotFragment extends Fragment implements Observer {
                                     }
                                     updateHeadBodyCoordinates();
                                 } catch (Exception e) {
-                                    e.printStackTrace();
+                                    Log.e("Algo", e.getMessage());
                                 }
                             }
                         }
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                        Log.e("Algo-asj3rb1", e.getMessage());
                     }
                 }
             } catch (JSONException e) {
-                e.printStackTrace();
+                Log.e("Algo-ah12hq", e.getMessage());
             }
         }
     }
@@ -633,7 +701,7 @@ public class RobotFragment extends Fragment implements Observer {
                         try {
                             Thread.sleep(200);
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            Log.e("Algo", e.getMessage());
                         }
                     }
                 }

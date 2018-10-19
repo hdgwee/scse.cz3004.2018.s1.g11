@@ -110,6 +110,7 @@ public class BluetoothLogActivity extends AppCompatActivity implements Observer 
 
         bluetoothMessageAdapter.update(bluetoothMessageArrayList);
         recyclerChatList.scrollToPosition(bluetoothMessageArrayList.size() - 1);
+        realm.close();
     }
 
     @Override

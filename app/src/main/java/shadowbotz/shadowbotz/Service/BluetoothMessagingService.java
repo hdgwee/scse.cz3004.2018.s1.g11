@@ -432,7 +432,7 @@ public class BluetoothMessagingService {
                 mmSocket.connect();
             } catch (IOException e) {
                 // Close the socket
-                e.printStackTrace();
+                Log.e("Algo", e.getMessage());
 
                 try {
                     mmSocket.close();
