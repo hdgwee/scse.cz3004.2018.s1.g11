@@ -11,7 +11,7 @@ Furthermore, users can use buttons to issue commands that are stored as a persis
 When reading, it will constantly listen to the InputStream and will then write the data to the connected OutputStream. String messages that are sent and received from Android mobile application will be saved in a database. The database adopted database is Realm. As compared to SQLite, Realm has a better insert, count and query performance. With these performance improvements, the Android mobile application will be able to display the current status of the arena using the map descriptor string and transmits String messages with minimal delay.
 
 ### Graphic User Interface (GUI) Design
-
+![ShadowBotz GUI](https://raw.githubusercontent.com/hdgwee/scse.cz3004.2018.s1.g11/master/img/Screenshot_Shadowbotz.jpg)
 
 1. Interactive Control of Robot Movement
 The application interface contains directional arrows which allow the user to remotely control the movement of the robot by the serial communication link established. Additionally, the application runs in landscape mode, which allows the user to use both hands to operate simultaneously without losing the screen estate for grid view while controlling the robot.
